@@ -1,0 +1,42 @@
+# secrets / local env
+.env
+secrets/
+*.pem
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+.ruff_cache/
+.ipynb_checkpoints/
+# data, outputs and heavy artifacts stay on the server (data/ holds symlinks to the shared raw datasets)
+data/
+outputs/
+logs/
+*.npz
+*.parquet
+*.pt
+*.pth
+*.dcm
+*.avi
+*.mp4
+*.nii.gz
+# Only individually reviewed, redistributable EV9V figures belong in docs.
+/docs/figures/*.png
+!/docs/figures/case_ev9v_*.png
+# os
+.DS_Store
+
+# Generated archives and additional raw medical/image payloads stay local
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.mhd
+*.mha
+*.raw
+*.nrrd
+*.DCM

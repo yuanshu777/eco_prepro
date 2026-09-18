@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "echoprep"
+version = "0.2.0"
+description = "Standardized preprocessing for echocardiography cines from heterogeneous sources: decode, detect the ultrasound imaging region, crop, and export a canonical representation."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+  "numpy>=2.0",
+  "scipy>=1.11",
+  "pandas>=2.1",
+  "pyarrow>=14.0",
+  "pillow>=10.0",
+  "opencv-python-headless>=4.9",
+  "scikit-image>=0.22",
+  "pydicom>=3.0",
+  "pylibjpeg>=2.0",
+  "pylibjpeg-libjpeg>=2.0",
+  "pylibjpeg-openjpeg>=2.0",
+  "SimpleITK>=2.3",
+  "nibabel>=5.0",
+  "av>=12.0",
+  "imageio[ffmpeg]>=2.34",
+  "pyyaml>=6.0",
+  "tqdm>=4.66",
+  "rich>=13.0",
+  "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+ml = ["torch>=2.2", "torchvision>=0.17", "huggingface_hub>=0.23"]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.5", "jupyter", "ipykernel"]
+
+[tool.setuptools.packages.find]
+include = ["echoprep*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -m 'not data'"
+markers = ["data: requires the shared datasets on the server"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

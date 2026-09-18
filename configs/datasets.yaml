@@ -1,0 +1,146 @@
+datasets:
+  ev9v:
+    root: data/ev9v
+    videos_glob: Videos/*.mp4
+    frames_dir: Images
+    splits:
+    - raw/train_labeled.txt
+    - raw/validation_labeled.txt
+    - raw/test_labeled.txt
+    reader: video
+    notes: 'Philips-style full screen at 320x240: text top-left/top-right, grey bar
+      right, ECG/timeline bottom. Sector centred.'
+    source_url: https://huggingface.co/datasets/bgx666/EV9V
+    license: CC-BY-4.0
+    access_method: archive
+    redistributable: true
+    redistribution_restrictions: Attribution required; record modifications.
+    exclusion_zones_xyxy_normalized:
+    - - 0
+      - 0
+      - 0.2
+      - 0.16
+    - - 0.95
+      - 0.1
+      - 1
+      - 0.88
+    - - 0
+      - 0.95
+      - 1
+      - 1
+    exclusion_zones_note: Conservative observed 320x240 Philips UI zones; Stage 1
+      QC only, never used to mask pixels.
+  echonet_dynamic:
+    root: data/echonet/dynamic/EchoNet-Dynamic
+    videos_glob: Videos/*.avi
+    reader: video
+    fps_table:
+      csv: FileList.csv
+      key: FileName
+      fps: FPS
+    notes: 112x112, already masked and cropped by Stanford. No overlays to remove;
+      use as an already-standardized control.
+    source_url: https://echonet.github.io/dynamic/
+    license: Stanford research use agreement
+    access_method: restricted
+    redistributable: false
+    redistribution_restrictions: No redistribution without permission; individual
+      research access required.
+    already_standardized: true
+  echonet_lvh:
+    root: data/echonet/lvh
+    videos_glob: Batch*/*.avi
+    reader: video
+    fps_table:
+      csv: MeasurementsList.csv
+      key: HashedFileName
+      fps: FPS
+    notes: 1024x768 and 800x600, sector on black, masked; PLAX only. Container fps
+      is NOT the acquisition fps.
+    source_url: https://echonet.github.io/lvh/
+    license: Stanford dataset agreement; verify current terms
+    access_method: restricted
+    redistributable: false
+    redistribution_restrictions: Local authorized use only; redistribution not approved.
+    already_standardized: true
+  echonet_pediatric:
+    root: data/echonet/pediatric/echonetpediatric/pediatric_echo_avi/pediatric_echo_avi
+    videos_glob: '*/Videos/*.avi'
+    reader: video
+    notes: 112x112, masked; A4C and PSAX folders.
+    source_url: https://echonet.github.io/pediatric/
+    license: Stanford dataset agreement; verify current terms
+    access_method: restricted
+    redistributable: false
+    redistribution_restrictions: Local authorized use only; redistribution not approved.
+    already_standardized: true
+  camus:
+    root: data/camus/CAMUS_public/database_nifti
+    videos_glob: patient*/patient*_[24]CH_half_sequence.nii.gz
+    reader: nifti
+    notes: Tall fan on black, no overlays, ~700x600, FrameRate in Info_*.cfg. Half
+      cycle (ED->ES) only.
+    source_url: https://www.creatis.insa-lyon.fr/Challenge/camus/databases.html
+    license: Dataset-specific terms; citation required; redistribution unverified
+    access_method: archive
+    redistributable: false
+    redistribution_restrictions: Keep derived samples local until redistribution terms
+      verified.
+  unity:
+    root: data/unity/png-cache/png-cache
+    videos_glob: '**/*.png'
+    reader: image
+    notes: Single PNG frames of raw GE/Philips screens incl. colour Doppler, ECG,
+      colour bar. No temporal axis -> static-layout audit only.
+    source_url: https://unityimaging.github.io/
+    license: NoDerivatives restriction recorded in project handoff; exact license
+      pending verification
+    access_method: archive
+    redistributable: false
+    redistribution_restrictions: 'Project policy: never redistribute Unity-derived
+      processed videos or QC figures.'
+  mimic_iv_echo:
+    root: data/mimic_iv_echo/raw
+    videos_glob: files/**/*.dcm
+    reader: dicom
+    notes: Not downloaded yet (PhysioNet credentialing pending). Main raw-clinical
+      DICOM source.
+    source_url: https://physionet.org/content/mimic-iv-echo/1.0.1/
+    license: PhysioNet Credentialed Health Data License 1.5.0
+    access_method: restricted
+    redistributable: false
+    redistribution_restrictions: Credentialing, training and DUA required; keep all
+      derived data restricted.
+    credential_env:
+    - PHYSIONET_USERNAME
+    - PHYSIONET_PASSWORD
+  samples_dicom:
+    root: data/samples_dicom
+    videos_glob: '**/*.dcm'
+    reader: dicom
+    notes: Small public DICOM cines (pydicom test data etc.) for exercising the DICOM
+      reader before MIMIC arrives.
+    source_url: https://github.com/pydicom/pydicom-data
+    license: 'Mixed: pydicom-data MIT; rubomedical sample terms unverified'
+    access_method: public_samples
+    redistributable: false
+    redistribution_restrictions: 'Mixed provenance: do not redistribute this combined
+      collection by default.'
+    sample_urls:
+    - url: https://raw.githubusercontent.com/pydicom/pydicom-data/abc42b90985fb6cf385aa4af766d2c9c94a257a4/data_store/data/US1_UNCR.dcm
+      filename: pydicom_tests/US1_UNCR.dcm
+      max_bytes: 8388608
+      sha256: af5a66e40cd49d15dfbf7b78c850eba0662bdc7339339c3fa13f123a57e812cb
+      license: MIT (pydicom-data repository)
+  hmc_qu:
+    root: data/hmc_qu
+    videos_glob: '**/*.avi'
+    reader: video
+    source_url: https://www.kaggle.com/datasets/aysendegerli/hmcqu-dataset
+    license: Unverified; review Kaggle dataset terms before use
+    access_method: restricted
+    redistributable: false
+    redistribution_restrictions: Not acquired; no redistribution approved.
+    credential_env:
+    - KAGGLE_USERNAME
+    - KAGGLE_KEY
