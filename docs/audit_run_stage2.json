@@ -1,0 +1,11 @@
+{
+  "manifest_sha256": "9b9fe337acf15cd1ef6531cdf92347118fc9d0b9c2efb8d731e4cf4cb08c48d1",
+  "config_sha256": "33d18eaab8737827bce9cdd1444dc4195a1c823938a772db8ad1722fe96a2cdc",
+  "git_head": "b494f9fd78fc554aa6270f834750e1a78a0d209d",
+  "git_dirty": true,
+  "max_frames": null,
+  "export": "mp4",
+  "mask_policy": "auto",
+  "cases": 42,
+  "source_sha256": "ea6c6c1a3639383946772800142ed802d9517dc9a54cf0ca9e0b0367f7cd1ecb"
+}

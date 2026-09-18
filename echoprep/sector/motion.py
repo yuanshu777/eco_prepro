@@ -1,4 +1,8 @@
-"""Motion-based detection of the ultrasound imaging region.
+"""Motion evidence followed by conservative ultrasound sector geometry.
+
+The frozen Stage 1 detector remains available as `_detect_motion`; the public `detect_sector`
+preserves its dispatch and adds allowed-area candidate search, geometry and temporal fit checks.
+The baseline algorithm below is retained for comparison and conservative hull fallback.
 
 Follows the Mayo Clinic recipe (Naser et al. 2024): find pixels that change over time, clean up with
 morphology, keep the largest (central) moving region, and crop to it. Refinements:
@@ -29,7 +33,7 @@ PROCESSING_STATUSES = {"SUCCESS", "PASSTHROUGH", "LOW_CONFIDENCE", "STATIC", "MU
 
 @dataclass
 class SectorResult:
-    mask: np.ndarray                      # (H, W) bool - filled convex imaging region
+    mask: np.ndarray                      # (H, W) bool - actual imaging mask, possibly nonconvex
     bbox: tuple[int, int, int, int]       # x0, y0, x1, y1 (exclusive)
     hull: np.ndarray                      # (N, 2) int32 polygon, xy
     status: str                           # one of PROCESSING_STATUSES
@@ -198,11 +202,12 @@ def fan_geometry(mask: np.ndarray) -> dict:
     return out
 
 
-def detect_sector(frames: np.ndarray, n_sample: int = 64, min_std: float = 3.0,
+def _detect_motion(frames: np.ndarray, n_sample: int = 64, min_std: float = 3.0,
                   min_area_frac: float = 0.04, kernel_frac: float = 0.012, band_frac: float = 0.08,
                   core_lit: float = 0.5, ext_lit: float = 0.02, static: bool = False,
                   keep_maps: bool = True, already_standardized: bool = False,
-                  exclusion_mask: np.ndarray | None = None) -> SectorResult:
+                  exclusion_mask: np.ndarray | None = None,
+                  allowed_mask: np.ndarray | None = None) -> SectorResult:
     """Detect the imaging region in a cine.
 
     frames:        (T, H, W, 3) uint8 RGB or (T, H, W) uint8.
@@ -252,6 +257,10 @@ def detect_sector(frames: np.ndarray, n_sample: int = 64, min_std: float = 3.0,
         ext = _open(lit >= ext_lit, _ellipse(k))
     else:
         core = ext = _open(gray[0] > DARK_LEVEL, _ellipse(k))
+    if allowed_mask is not None:
+        core &= allowed_mask
+        ext &= allowed_mask
+        motion_cut &= allowed_mask
     support_cut = _open(core, _vline(hv))   # thin strips cannot bridge components during selection
     support = core
 
@@ -275,7 +284,7 @@ def detect_sector(frames: np.ndarray, n_sample: int = 64, min_std: float = 3.0,
     coverage = float(areas.max() / max(areas.sum(), 1)) if areas.size else 0.0
     outside_lit = float((lit[(lc != dominant) & (lit > 0)]).sum() / max(lit.sum(), 1))
     generic_pre = panel.sum() == 1 and touches >= 3 and ext.mean() >= .50 and coverage > .995 and outside_lit < .002
-    if use_motion and stats["std_p99"] >= min_std and (already_standardized or generic_pre):
+    if allowed_mask is None and use_motion and stats["std_p99"] >= min_std and (already_standardized or generic_pre):
         mask = np.ones((H, W), bool)
         hull = np.array([[0, 0], [W-1, 0], [W-1, H-1], [0, H-1]], np.int32)
         stats.update({"precropped": True, "passthrough_basis": "source_policy" if already_standardized else "image_evidence",
@@ -314,6 +323,8 @@ def detect_sector(frames: np.ndarray, n_sample: int = 64, min_std: float = 3.0,
             flags.extend(cut)
             if cut:
                 region = ndi.binary_fill_holes(region)
+    if region is not None and allowed_mask is not None:
+        region &= allowed_mask
     motion_comp = (motion_cut & region) if region is not None else np.zeros((H, W), bool)
 
     if region is None or not region.any():
@@ -324,6 +335,8 @@ def detect_sector(frames: np.ndarray, n_sample: int = 64, min_std: float = 3.0,
                             {"std": std, "lit": lit} if keep_maps else {}, flags), frames[idx], exclusion_mask)
 
     mask, hull = _hull_mask(region)
+    if allowed_mask is not None:
+        mask &= allowed_mask
     bbox = _bbox(mask)
     x0, y0, x1, y1 = bbox
     area_frac = float(mask.mean())
@@ -358,7 +371,7 @@ def detect_sector(frames: np.ndarray, n_sample: int = 64, min_std: float = 3.0,
     if "multiple_regions" in flags:
         status = "MULTI_REGION"
     maps = {"std": std, "mean": mean, "lit": lit, "support": support, "ext": ext,
-            "motion": motion_comp} if keep_maps else {}
+            "motion": motion_comp, "candidate": region} if keep_maps else {}
     return quality_guards(SectorResult(mask, bbox, hull, status, stats, maps, flags),
                           frames[idx], exclusion_mask)
 
@@ -399,4 +412,238 @@ def quality_guards(result: SectorResult, frames: np.ndarray,
     if result.status in {"STATIC", "MULTI_REGION", "LOW_CONFIDENCE", "FAILED"}:
         flags.append("manual_review_required")
     result.flags = list(dict.fromkeys(flags))
+    return result
+
+
+def detect_sector(
+    frames: np.ndarray,
+    n_sample: int = 64,
+    min_std: float = 3.0,
+    min_area_frac: float = 0.04,
+    kernel_frac: float = 0.012,
+    band_frac: float = 0.08,
+    core_lit: float = 0.5,
+    ext_lit: float = 0.02,
+    static: bool = False,
+    keep_maps: bool = True,
+    already_standardized: bool = False,
+    exclusion_mask: np.ndarray | None = None,
+    refine_geometry: bool = True,
+    verify_stability: bool = True,
+) -> SectorResult:
+    """Stage 2 sector-only extension; Stage 1 dispatch/status and preservation contracts remain.
+
+    Pass-through, static and multi-panel inputs are returned before any geometry work. Motion
+    locates a connected candidate; support boundaries constrain geometry. Fit diagnostics live
+    in SectorResult.stats/maps, so readers, canonical Cine and export schemas need no changes.
+    Set refine_geometry=False to reproduce the frozen Stage 1 detector for regression comparisons.
+    verify_stability=False is for diagnostics: production fits must also agree across
+    interleaved samples at two evidence densities. One mask is used for the entire cine.
+    """
+    from hashlib import sha256
+
+    from echoprep.sector.geometry import fit_geometry
+    from echoprep.sector.layouts import allowed_area
+
+    options = {
+        "n_sample": n_sample,
+        "min_std": min_std,
+        "min_area_frac": min_area_frac,
+        "kernel_frac": kernel_frac,
+        "band_frac": band_frac,
+        "core_lit": core_lit,
+        "ext_lit": ext_lit,
+        "static": static,
+        "keep_maps": True,
+        "already_standardized": already_standardized,
+        "exclusion_mask": exclusion_mask,
+    }
+    baseline = _detect_motion(frames, **options)
+    if not refine_geometry:
+        if not keep_maps:
+            baseline.maps = {}
+        return baseline
+    baseline.stats["stage2_baseline_status"] = baseline.status
+    baseline.stats["stage2_method"] = "retained_stage1"
+    if (
+        baseline.status in {"PASSTHROUGH", "STATIC", "MULTI_REGION", "FAILED"}
+        or "low_motion" in baseline.flags
+    ):
+        baseline.stats["stage2_skip_reason"] = baseline.status
+        if not keep_maps:
+            baseline.maps = {}
+        return baseline
+    idx = np.unique(np.linspace(0, len(frames) - 1, min(len(frames), n_sample)).round().astype(int))
+    sampled = frames[idx]
+    allowed, layout = allowed_area(sampled, exclusion_mask)
+    # Candidate search and growth happen inside allowed pixels. Do not mutate source RGB frames.
+    candidate = _detect_motion(sampled, **options, allowed_mask=allowed)
+    base_region = baseline.maps.get("candidate", baseline.mask)
+    protected = ndi.binary_erosion(
+        base_region & baseline.maps.get("support", base_region), iterations=2
+    )
+    lost = float((protected & ~allowed).sum() / max(int(protected.sum()), 1))
+    baseline.stats.update(
+        stage2_layout=layout,
+        stage2_excluded_core_fraction=lost,
+        stage2_allowed_sha256=sha256(np.packbits(allowed).tobytes()).hexdigest(),
+    )
+    baseline.maps["allowed"] = allowed
+    baseline.maps["baseline_mask"] = baseline.mask.copy()
+    if (
+        lost > 0.015
+        or candidate.status in {"FAILED", "STATIC", "MULTI_REGION"}
+        or "low_motion" in candidate.flags
+    ):
+        baseline.status = "LOW_CONFIDENCE"
+        baseline.flags = list(
+            dict.fromkeys(
+                baseline.flags + ["unsafe_exclusion_or_candidate", "manual_review_required"]
+            )
+        )
+        baseline.stats["stage2_skip_reason"] = (
+            "exclusion_conflict" if lost > 0.015 else "ambiguous_candidate"
+        )
+        if not keep_maps:
+            baseline.maps = {}
+        return baseline
+    evidence = candidate.maps.get("candidate", candidate.mask) & allowed
+    moving = candidate.maps["std"] > candidate.stats.get("std_threshold", min_std)
+    fitted, records = fit_geometry(evidence, allowed, moving)
+    baseline.stats["stage2_candidates"] = records
+    baseline.maps.update(candidate=evidence, motion=moving & evidence)
+
+    def fallback_hull():
+        # Keep only a previously trustworthy hull; never promote a weak baseline by fallback.
+        mask = baseline.mask & allowed
+        baseline.stats["stage2_method"] = "fallback_hull"
+        baseline.flags = list(dict.fromkeys(baseline.flags + ["geometry_fallback_hull"]))
+        if baseline.status == "SUCCESS":
+            baseline.mask = mask
+            baseline.bbox = _bbox(mask)
+            convex, baseline.hull = _hull_mask(mask)
+            x0, y0, x1, y1 = baseline.bbox
+            baseline.stats.update(
+                area_frac=float(mask.mean()),
+                solidity=float(mask.sum() / max(int(convex.sum()), 1)),
+                bbox=list(baseline.bbox),
+                bbox_w=x1 - x0,
+                bbox_h=y1 - y0,
+                touches_left=x0 <= 0.03 * mask.shape[1],
+                touches_right=x1 >= 0.97 * mask.shape[1],
+                touches_top=y0 <= 0.03 * mask.shape[0],
+                touches_bottom=y1 >= 0.97 * mask.shape[0],
+            )
+            baseline.stats.update({f"fan_{k}": v for k, v in fan_geometry(mask).items()})
+            quality_guards(baseline, sampled, exclusion_mask)
+        else:
+            baseline.flags = list(
+                dict.fromkeys(baseline.flags + ["geometry_unreliable", "manual_review_required"])
+            )
+        baseline.maps["fitted"] = mask
+        if not keep_maps:
+            baseline.maps = {}
+        return baseline
+
+    if fitted is None:
+        return fallback_hull()
+    mask = fitted.mask
+    baseline.stats.update(
+        stage2_proposed_family=fitted.family,
+        stage2_proposed_parameters=fitted.parameters,
+        stage2_proposed_metrics=fitted.metrics,
+    )
+    core_loss = float((protected & ~mask).sum() / max(int(protected.sum()), 1))
+    baseline.stats["stage2_fit_core_loss"] = core_loss
+    if core_loss > 0.01:
+        baseline.status = "LOW_CONFIDENCE"
+        baseline.flags = list(
+            dict.fromkeys(baseline.flags + ["geometry_core_loss", "manual_review_required"])
+        )
+        baseline.stats["stage2_skip_reason"] = "fit_loses_baseline_support"
+        baseline.maps["fitted"] = mask
+        if not keep_maps:
+            baseline.maps = {}
+        return baseline
+    if verify_stability:
+        checks = []
+        parts = [sampled[::2], sampled[1::2]]
+        if len(frames) > n_sample:
+            # Re-sample both original parity streams as well: splitting the original
+            # 64-frame sample alone can miss sensitivity to temporal sampling phase.
+            parts.extend([frames[::2], frames[1::2]])
+        for part in parts:
+            if len(part) < 4:
+                continue
+            check = detect_sector(part, **{**options, "keep_maps": False}, verify_stability=False)
+            checks.append(check)
+        stable = len(checks) == len(parts)
+        overlap = 0.0
+        if stable:
+            overlap = min(
+                float((a.mask & b.mask).sum() / max(int((a.mask | b.mask).sum()), 1))
+                for i, a in enumerate(checks)
+                for b in checks[i + 1 :]
+            )
+            stable = overlap >= 0.98 and all(
+                check.status == "SUCCESS"
+                and check.stats.get("stage2_method") == "geometry_fit"
+                and float((mask & check.mask).sum() / max(int((mask | check.mask).sum()), 1))
+                >= 0.97
+                for check in checks
+            )
+        baseline.stats.update(
+            stage2_stability_iou=overlap,
+            stage2_stability_statuses=[check.status for check in checks],
+            stage2_stability_methods=[check.stats.get("stage2_method") for check in checks],
+            stage2_stability_passed=stable,
+        )
+        if not stable:
+            baseline.flags = list(dict.fromkeys(baseline.flags + ["geometry_temporal_instability"]))
+            baseline.stats["stage2_skip_reason"] = "unstable_geometry"
+            baseline.maps["rejected_fit"] = mask
+            return fallback_hull()
+    convex, hull = _hull_mask(mask)
+    resolved = {
+        "low_solidity",
+        "small_area",
+        "small_region",
+        "overlay_contact",
+        "motion_not_captured",
+        "manual_review_required",
+    }
+    flags = [f for f in candidate.flags if f not in resolved]
+    stats = {**baseline.stats, **candidate.stats}
+    x0, y0, x1, y1 = _bbox(mask)
+    lit = candidate.maps["lit"]
+    stats.update(
+        stage2_seed_motion_share=candidate.stats.get("motion_share_in_region"),
+        motion_share_in_region=float((moving & mask).sum() / max(int((moving & allowed).sum()), 1)),
+        stage2_method="geometry_fit",
+        stage2_family=fitted.family,
+        stage2_parameters=fitted.parameters,
+        stage2_metrics=fitted.metrics,
+        stage2_mask_sha256=sha256(np.packbits(mask).tobytes()).hexdigest(),
+        area_frac=float(mask.mean()),
+        solidity=float(mask.sum() / max(int(convex.sum()), 1)),
+        bbox=list(_bbox(mask)),
+        bbox_w=x1 - x0,
+        bbox_h=y1 - y0,
+        touches_left=x0 <= 0.03 * mask.shape[1],
+        touches_right=x1 >= 0.97 * mask.shape[1],
+        touches_top=y0 <= 0.03 * mask.shape[0],
+        touches_bottom=y1 >= 0.97 * mask.shape[0],
+        lit_inside=float(lit[mask].mean()),
+        lit_outside=float(lit[~mask].mean()) if (~mask).any() else 0.0,
+        motion_inside=float(moving[mask].mean()),
+        motion_outside=float(moving[~mask].mean()) if (~mask).any() else 0.0,
+        precropped=False,
+    )
+    stats.update({f"geometry_{k}": v for k, v in fitted.metrics.items()})
+    stats.update({f"fan_{k}": v for k, v in fan_geometry(mask).items()})
+    result = SectorResult(mask, _bbox(mask), hull, "SUCCESS", stats, baseline.maps, flags)
+    result.maps["fitted"] = mask
+    result = quality_guards(result, sampled, exclusion_mask)
+    if not keep_maps:
+        result.maps = {}
     return result

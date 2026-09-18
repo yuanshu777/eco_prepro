@@ -1,0 +1,8 @@
+{
+  "cases": 42,
+  "frozen_stage1_files": 30,
+  "exact_baseline_reproductions": 42,
+  "in_memory_preserved": 33,
+  "all_exports_verified": true,
+  "source_sha256": "ea6c6c1a3639383946772800142ed802d9517dc9a54cf0ca9e0b0367f7cd1ecb"
+}

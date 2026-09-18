@@ -1,0 +1,52 @@
+[
+  {
+    "id": "ev9v_d47d8e7414433eb2",
+    "role": "moving normal/wide fan and ECG",
+    "tuning": true
+  },
+  {
+    "id": "ev9v_7de26f89888ddbbc",
+    "role": "moving narrower support",
+    "tuning": true
+  },
+  {
+    "id": "ev9v_a9b7d8c2e96c23f1",
+    "role": "dark sector",
+    "tuning": true
+  },
+  {
+    "id": "ev9v_cd3379c7d3cb01d0",
+    "role": "moving wide fan",
+    "tuning": true
+  },
+  {
+    "id": "ev9v_64426727a52ea9f4",
+    "role": "moving narrower visible field",
+    "tuning": true
+  },
+  {
+    "id": "ev9v_c4c5ec54d47a2742",
+    "role": "moving fan with edge ticks",
+    "tuning": true
+  },
+  {
+    "id": "ev9v_fb3e1179f73d21f2",
+    "role": "JPEG sequence with ECG / boundary artifacts",
+    "tuning": true
+  },
+  {
+    "id": "unity_7cda63d7242f48fa",
+    "role": "static raw dark-screen retention control",
+    "tuning": false
+  },
+  {
+    "id": "unity_bdefb61b0cc5feb6",
+    "role": "static tinted raw-screen retention control",
+    "tuning": false
+  },
+  {
+    "id": "samples_dicom_eb89e1fa39011987",
+    "role": "rotated color wedge / multiple-panel retention control",
+    "tuning": false
+  }
+]
