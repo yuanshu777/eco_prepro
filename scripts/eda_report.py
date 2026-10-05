@@ -341,13 +341,13 @@ def main():
     report.new_page("4.1 View distributions: keep label sources separate")
     report.figure("01_views", maxheight=255)
     report.p(
-        f"<b>EV9V:</b> PLHLA has 1,580 clips ({1580 / len(ev) * 100:.1f}%) and A4C has 1,237 ({1237 / len(ev) * 100:.1f}%). SC4C has 250. Class imbalance should be reported before any training sampler changes these proportions."
+        f"<b>EV9V:</b> parasternal long-axis (PLAX) has 1,580 videos ({1580 / len(ev) * 100:.1f}%), parasternal short-axis (PSAX) has 1,332 ({1332 / len(ev) * 100:.1f}%), and apical four-chamber (A4C) has 1,237 ({1237 / len(ev) * 100:.1f}%). PSAX combines PASA, PMVLSA, PPMLSA and PMASA. The 453 PMPALA videos remain separate because their anatomical mapping is unresolved."
     )
     report.p(
         f"<b>MIMIC:</b> {len(pred):,} existing EchoPrime caches match the current file records. The figure uses the argmax of the mean raw 11-class probability over sampled frames. This is an explicitly defined prediction aggregation, not an expert annotation or the true prevalence of cardiac views. {len(mi) - len(pred):,} local objects have no reused prediction in this plot."
     )
     report.p(
-        "<b>EchoNet-Dynamic:</b> all 10,030 videos are A4C by dataset design. This source alone cannot measure multi-view recognition performance. EV9V has no A2C category in its released nine-label ontology; this is not an observed zero rate of A2C appearances within frames."
+        "EV9V has no apical two-chamber (A2C) category in its released labels; this does not establish that A2C anatomy never appears within individual frames."
     )
     report.p(
         "MIMIC cached predictions include Doppler-labelled outputs even though the selected loops have tissue-only region metadata. That mismatch is evidence for reviewing the predictor or mode metadata, not proof of either actual mode or view.",

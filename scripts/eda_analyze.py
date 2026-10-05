@@ -328,25 +328,38 @@ def distribution_figures(df, pred, qc, out, registry):
         }
     )
     ev, mi, en = [df[df.dataset == src] for src in SOURCES]
-    fig, axs = plt.subplots(1, 3, figsize=(12.4, 3.6))
-    raw = ev.original_view.value_counts().sort_values()
-    axs[0].barh(raw.index, raw.values, color=COLORS[0])
-    axs[0].set_title("EV9V: released clip labels")
+    fig, axs = plt.subplots(1, 2, figsize=(14, 4.2))
+    view_names = {
+        "A2C": "Apical two-chamber (A2C)",
+        "A3C": "Apical three-chamber (A3C)",
+        "A4C": "Apical four-chamber (A4C)",
+        "A5C": "Apical five-chamber (A5C)",
+        "PLAX": "Parasternal long-axis (PLAX)",
+        "PSAX": "Parasternal short-axis (PSAX)",
+        "SC4C": "Subcostal four-chamber (SC4C)",
+        "SSN": "Suprasternal notch (SSN)",
+        "Doppler PLAX": "Doppler: parasternal long-axis",
+        "Doppler PSAX": "Doppler: parasternal short-axis",
+        "Apical Doppler": "Apical Doppler",
+        "Subcostal": "Subcostal",
+        "Unmapped": "Unmapped (PMPALA)",
+    }
+    grouped_views = ev.family_view.fillna("Unmapped").value_counts().sort_values()
+    axs[0].barh([view_names[k] for k in grouped_views.index], grouped_views.values, color=COLORS[0])
+    axs[0].set_title("Cardiac views (EV9V)")
     pv = pred.predicted_view.value_counts().sort_values()
-    axs[1].barh(pv.index, pv.values, color=COLORS[1])
-    axs[1].set_title(f"MIMIC: predicted views (n={len(pred):,})")
-    axs[2].bar(["A4C"], [len(en)], color=COLORS[2], width=0.35)
-    axs[2].set_xlim(-1, 1)
-    axs[2].set_title("EchoNet: dataset inclusion criterion")
+    axs[1].barh([view_names[k] for k in pv.index], pv.values, color=COLORS[1])
+    axs[1].set_title("Predicted cardiac views (MIMIC-IV-Echo)")
     for ax in axs:
-        ax.set_xlabel("Videos / loops")
+        ax.set_xlabel("Video")
+        ax.tick_params(axis="y", labelsize=9)
     fig.tight_layout()
     savefig(
         fig,
         out,
         "01_views",
-        "Label provenance differs: EV9V has released clip labels; MIMIC uses mean raw EchoPrime probabilities from existing caches; EchoNet is A4C by design. MIMIC predictions are not ground truth.",
-        "full inventories; existing MIMIC prediction caches",
+        "EV9V (n=5,138): released labels grouped into cardiac-view families. PASA, PMVLSA, PPMLSA and PMASA form PSAX (n=1,332); PMPALA remains unmapped (n=453). MIMIC (n=5,625): predicted classes from mean raw EchoPrime probabilities, not expert labels. EchoNet is omitted from this view-distribution figure.",
+        "full EV9V inventory; existing MIMIC prediction caches",
         registry,
     )
 
@@ -425,39 +438,30 @@ def distribution_figures(df, pred, qc, out, registry):
     )
 
     cohorts = [ev, mi[mi.bmode_cine == True], en]
-    fig, axs = plt.subplots(1, 2, figsize=(12.4, 3.5))
-    for src, g, color in zip(SOURCES, cohorts, COLORS):
+    fig, axs = plt.subplots(1, 3, figsize=(12.4, 3.5), sharex=True)
+    bins = np.geomspace(0.1, 150, 38)
+    for ax, src, g, color in zip(axs, SOURCES, cohorts, COLORS):
         vals = np.sort(g.duration_s.dropna().to_numpy())
-        axs[0].plot(
+        ax.hist(
             vals,
-            np.arange(1, len(vals) + 1) / len(vals),
-            label=f"{src} (n={len(vals):,})",
+            bins=bins,
             color=color,
+            edgecolor="white",
+            linewidth=0.5,
         )
-        axs[1].hist(
-            vals,
-            bins=np.geomspace(0.1, 150, 38),
-            weights=np.ones(len(vals)) * 100 / len(vals),
-            histtype="step",
-            linewidth=1.8,
-            label=src,
-            color=color,
-        )
-    axs[0].set_xscale("log")
-    axs[0].set_ylabel("Cumulative fraction")
-    axs[0].yaxis.set_major_formatter(PercentFormatter(1))
-    axs[0].legend(fontsize=8)
-    axs[1].set_xscale("log")
-    axs[1].set_ylabel("Within-cohort videos (%)")
-    for ax in axs:
-        ax.set_xlabel("Playback duration (seconds; log scale)")
-        ax.grid(alpha=0.2)
+        ax.set_title(f"{src} (n={len(vals):,})")
+        ax.set_xscale("log")
+        ax.set_xlim(0.1, 150)
+        ax.set_xticks([0.5, 1, 2, 5, 10, 30, 100], ["0.5", "1", "2", "5", "10", "30", "100"])
+        ax.set_xlabel("Video length")
+        ax.set_ylabel("Count")
+        ax.grid(axis="y", alpha=0.2)
     fig.tight_layout()
     savefig(
         fig,
         out,
         "03_duration",
-        "EV9V and EchoNet: all videos. MIMIC: header-defined dynamic 2D tissue loops, including incomplete studies. Playback duration is N/FPS; first-to-last span is stored separately. Static and unknown-time objects are not assigned zero seconds.",
+        "Video length is measured in seconds on a logarithmic axis; bars show video counts in identical bins, with a separate count scale for each dataset. EV9V and EchoNet include all videos; MIMIC includes dynamic 2D tissue loops. Playback duration is N/FPS. Stills and unknown-time objects are not assigned zero seconds.",
         "full inventories; MIMIC B-mode header selection",
         registry,
     )
@@ -634,7 +638,8 @@ def mask_examples(df, out, registry):
                 ax.set_yticks([])
             axs[j, 0].set_ylabel(f"Frame {k}\n{k / r['fps']:.2f} s")
         for ax, label in zip(
-            axs[0], ["Original", "Temporal evidence", "Fixed proposed mask", "Actual output"]
+            axs[0],
+            ["Original", "Dynamic pixel method", "Fixed proposed mask", "Preprocessed output"],
         ):
             ax.set_title(label)
         fig.suptitle(f"{title}: {sector.status} | {record['action']}", fontsize=14)
@@ -736,9 +741,10 @@ def temporal_example(df, routing, out, registry, vid, name, title, uncertain=Fal
         ax.set(
             xlim=(0, (n - 1) / fps),
             ylim=(0, 1),
-            ylabel=model + "\nProbability",
-            xlabel="Native video time (s)",
+            ylabel="Baseline probability",
+            xlabel="Video time",
         )
+        ax.set_title(model, loc="left", fontsize=10)
         ax.legend(loc="upper left", bbox_to_anchor=(1, 1), fontsize=8)
     fig.suptitle(title + "\nCandidate only; no independent expert segment labels", fontsize=13)
     fig.tight_layout()
@@ -746,7 +752,7 @@ def temporal_example(df, routing, out, registry, vid, name, title, uncertain=Fal
         fig,
         out,
         name,
-        "Chronological frames from one native EV9V video, with pre-existing corrected model probabilities. Shading selects a review interval, not a true transition boundary. Prediction changes or entropy do not establish probe movement. EV9V: Bo Gou et al., CC BY 4.0.",
+        "Chronological frames from one native EV9V video; video time is in seconds. Baseline probability denotes each displayed model's class probability. Shading marks a review interval, not a verified transition boundary. Prediction changes do not establish probe movement. EV9V: Bo Gou et al., CC BY 4.0.",
         "purposefully selected discovery example; not a prevalence sample",
         registry,
     )

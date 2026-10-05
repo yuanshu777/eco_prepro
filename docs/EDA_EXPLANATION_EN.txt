@@ -1,0 +1,349 @@
+Echocardiography EDA: English Explanation Guide
+
+This guide explains the terminology, figures and interpretation of the revised English EDA report. It refers to the frozen October 5, 2026 inventory, not to files downloaded later. Figure references follow the numbered sections in the report. An appendix in the generated guide defines all 69 inventory columns.
+
+THE PROJECT IN PLAIN ENGLISH
+
+We are preparing ultrasound videos of the heart for consistent analysis across different datasets. The inputs differ in file format, image size, screen layout, timing and available labels. Our preprocessing pipeline reads these inputs, identifies the ultrasound imaging region when reliable, and preserves the original input when a crop is uncertain.
+
+The EDA describes what data we have, how the sources differ, and what information is missing. It also illustrates existing masking behavior and possible changes of cardiac view within a video. It does not measure diagnostic accuracy, establish true transition boundaries, or report a new model-training experiment.
+
+CORE DATA TERMS
+
+EDA - Exploratory Data Analysis. Examining counts, distributions, relationships, examples and missing information to understand a dataset before making stronger claims or designing experiments.
+
+Dataset / source - A collection of data with a shared origin. Here the sources are EV9V, MIMIC-IV-Echo and EchoNet-Dynamic. A source can have its own acquisition, labeling and preprocessing conventions.
+
+Unit of analysis - The entity counted in a particular analysis: a patient, examination, file, video, frame or time interval. The unit must be stated because these counts mean different things.
+
+Patient / subject - One person. A patient may have several examinations and many files. MIMIC provides patient linkage; a video filename alone does not establish patient identity.
+
+Study - An echocardiographic examination. One study can contain multiple views, stored loops, still images and imaging modes. A list of files in a study is not necessarily a continuous recording.
+
+Video / clip / cine / loop - A sequence of image frames. A cine is the medical-imaging term for a moving sequence; a loop is often a short sequence replayed repeatedly. One file can contain multiple cardiac cycles without containing multiple cardiac views.
+
+Frame - One image in a sequence. Adjacent frames usually show the same patient and very similar anatomy, so they are correlated observations rather than independent patients.
+
+Segment / interval - A specified portion of a video, described by start and end times or frame indices. A candidate interval is proposed for review; it has not necessarily been confirmed by an expert.
+
+Native / original - The representation supplied to this project before our own transformation. This does not mean it is untouched scanner data: a released dataset may already have been resized or masked.
+
+Derivative / representation - Another stored form of the same underlying recording. For EV9V, an MP4 and its matching JPEG sequence are representations of one video, not two independent cases. Compression can make their decoded pixels differ.
+
+Inventory / manifest - A table listing files and their attributes. The unified inventory has one row per native local file and columns for source, dimensions, timing, labels and provenance.
+
+Snapshot / frozen inventory - A fixed file list recorded at a particular time. MIMIC downloads were ongoing, so freezing the list prevents a changing download from silently changing the reported denominator.
+
+Metadata / header / tag - Information describing a file, such as frame count, image dimensions or acquisition time. A DICOM tag is a named metadata field. Successfully reading a header does not prove that its compressed image pixels can all be decoded.
+
+Provenance - A record of where a value came from and how it was obtained. For example, FPS can come from a dataset table, a video container or a DICOM timing field.
+
+Annotation / label / ground truth - An annotation is supplied information about an image or video. A label assigns a category such as A4C. Ground truth means the reference used to evaluate an exact task; a released video label does not provide frame-level transition boundaries.
+
+Prediction / cache - A prediction is a model output. A cache stores outputs from an earlier model run so they can be reused. This EDA reused existing predictions and did not train or run a new classifier.
+
+Ontology / class / view family / mapping - An ontology is the list of allowed categories. A class is one category. A view family groups related labels into a broader category. A mapping records that grouping. Unmapped means the original label exists but its destination is unresolved.
+
+CARDIAC VIEW NAMES
+
+Cardiac view - The imaging plane or perspective from which the heart is shown. A change in the heart's shape during a heartbeat is not automatically a change in cardiac view.
+
+Apical - Obtained from an acoustic window near the heart's apex. Parasternal - Obtained beside the breastbone. Subcostal - Obtained from below the rib margin. Suprasternal - Obtained from the notch above the breastbone. Long-axis and short-axis describe imaging along or across an anatomical structure.
+
+A4C: Apical four-chamber view. A perspective intended to display both atria and both ventricles.
+
+A2C: Apical two-chamber view. A perspective centered on the left atrium and left ventricle.
+
+A3C: Apical three-chamber view. Also called an apical long-axis view; it includes the left-sided chambers and the aortic outflow region.
+
+A5C: Apical five-chamber view. Similar to the four-chamber perspective, with the aortic outflow region brought into view. The heart does not have a literal fifth chamber.
+
+PLAX: Parasternal long-axis view. A lengthwise view obtained from beside the breastbone.
+
+PSAX: Parasternal short-axis view. A cross-sectional view obtained from beside the breastbone. Different levels can show the valves, papillary muscles or more apical parts of the ventricle.
+
+SC4C: Subcostal four-chamber view. A four-chamber perspective obtained below the rib margin.
+
+SSN: Suprasternal notch view. Imaging from the notch above the breastbone, commonly used to examine the aortic region.
+
+Subcostal in the MIMIC prediction chart is the model's broader category. It should not automatically be interpreted as a verified subcostal four-chamber annotation.
+
+Doppler - An ultrasound mode using frequency shifts to describe movement, commonly blood flow. Color Doppler and spectral Doppler can add colored overlays or velocity displays. An RGB file alone does not establish that Doppler imaging is present.
+
+Clinical view terminology follows the ASE examination guidance: https://www.asecho.org/guideline/comprehensive-tte-in-adults/
+
+EV9V RAW CODES AND THE GROUPING USED HERE
+
+PLHLA is grouped into PLAX. PASA, PMVLSA, PPMLSA and PMASA are grouped into PSAX. A4C, A5C and SC4C keep their existing family names. This produces five resolved view families plus an Unmapped group.
+
+PMPALA remains Unmapped. The public dataset card and the accompanying STFM documentation disagree on its anatomical expansion. The dataset card associates it with the main pulmonary artery, while STFM describes an apical long-axis category. We preserve the raw code instead of guessing a family.
+
+The sources also disagree about the precise PSAX levels assigned to some of the other codes. For example, PMASA is described as apical-level short-axis in the dataset card and mitral-valve-level short-axis in STFM. Both remain within PSAX, so the coarse grouping does not require choosing between those level names.
+
+The revised EV9V chart therefore contains PLAX 1,580; PSAX 1,332; A4C 1,237; A5C 286; SC4C 250; and Unmapped 453. These sum to 5,138. The shared letters PM are not themselves a sufficient anatomical grouping rule.
+
+Source comparison: https://huggingface.co/datasets/bgx666/EV9V/blob/main/README.md and https://github.com/bgx666/stfm/blob/main/README.md
+
+FORMATS, IMAGE DIMENSIONS AND TIMING
+
+MP4 / AVI - Video container formats. A container stores an encoded video stream and associated information. A codec specifies how the image sequence is compressed and decoded. The extension alone does not identify all encoding details.
+
+JPEG - A compressed still-image format. A numerically ordered folder of JPEG frames can represent a video if timing is supplied separately. Sorting names numerically prevents frame 10 from being placed before frame 2.
+
+DICOM - Digital Imaging and Communications in Medicine. A medical-imaging format that combines image data with structured metadata. A DICOM object may contain one still image or many frames.
+
+CSV / JSON / NPZ / Notebook - CSV is a table stored as text; JSON stores structured records; NPZ stores numerical arrays; a Notebook combines explanation and executable analysis cells. These are analysis artifacts, not additional patients or videos.
+
+Pixel / canvas / width x height - A pixel is one image element. The canvas is the complete rectangular image, including borders and screen graphics. Width x height gives the number of pixel columns and rows. EV9V is 320 x 240, MIMIC is 1016 x 708 in this snapshot, and EchoNet is 112 x 112.
+
+Pixel dimensions versus physical resolution - More pixels do not automatically mean better anatomical detail. Physical calibration relates pixel distances to units such as centimetres. True spatial resolution concerns the ability to distinguish nearby structures. A screenshot's large canvas can contain extensive background and interface graphics.
+
+Grayscale / RGB / photometric interpretation - Grayscale represents intensity; RGB uses red, green and blue channels. DICOM photometric interpretation describes how stored values should be displayed. MONOCHROME1 and MONOCHROME2 have opposite grayscale polarity conventions.
+
+FPS - Frames per second. It describes the timing rate used in this analysis. A playback rate is not guaranteed to equal the original scanner acquisition rate. FPS is also different from heart rate, which is measured in beats per minute.
+
+Playback duration - For N frames at a constant rate f, duration = N/f. For example, 90 frames at 30 FPS have a playback duration of 3 seconds.
+
+First-to-last time span - The elapsed time between the first and last frame timestamps. At a constant rate it is (N-1)/f. The same 90-frame video spans about 2.967 seconds between its first and last frame timestamps.
+
+FrameTime / FrameTimeVector - DICOM timing fields for a nominal frame interval or individual frame-to-frame intervals. The vector starts with a zero interval. Our code records which timing source was selected; the current dynamic MIMIC snapshot uses FrameTime. See the DICOM Cine Module: https://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.7.6.5.html
+
+Timing conflict - More than 5% disagreement between the selected FPS and an available alternative rate. Eight MIMIC objects have such conflicts. This is a metadata inconsistency flag, not proof that their videos are corrupt.
+
+Dynamic / static - In the inventory, dynamic means more than one reported frame; static means a single stored image. This does not independently measure visible motion. The detector's STATIC status is a separate processing decision about insufficient motion evidence.
+
+STATISTICS AND SAMPLING TERMS
+
+Count / n / denominator - Count is the number of items. The symbol n gives the sample or cohort size. A denominator is the total used in a fraction. Always check whether it counts files, videos, patients, frames or seconds.
+
+Distribution / histogram / bin - A distribution describes how values are spread. A histogram groups numerical values into intervals called bins. A bar's height in the revised duration figure is the number of videos in that interval.
+
+Median / mean - The median is the middle value after sorting. The mean is the sum divided by the number of values. Very long videos can raise the mean much more than the median.
+
+Percentile / P05 / P95 - A percentile gives a position in the sorted distribution. Approximately 5% of observations lie at or below P05 and 95% at or below P95. They are descriptive distribution points, not confidence limits.
+
+Quartiles / IQR - The first and third quartiles are the 25th and 75th percentiles. IQR means interquartile range: the middle 50% of observations. The report writes the lower and upper quartile values as an interval.
+
+Long tail / skew - A long tail means a relatively small number of observations extend far beyond the main concentration. EV9V has a longer duration tail, including videos over 100 seconds.
+
+Logarithmic axis - Equal visual distances represent equal ratios rather than equal differences. On a base-10 log axis, 1 to 10 occupies the same distance as 10 to 100. This makes short and long videos visible together. The revised duration figure still measures seconds.
+
+ECDF / cumulative fraction - The empirical cumulative distribution function gives the fraction of observations at or below a value. A cumulative fraction of 0.8 at 50 FPS means 80% of the displayed cohort has FPS no greater than 50. Section 4.4 uses this form; revised section 4.3 uses counts instead.
+
+Box plot - The central line marks the median; the box spans the first to third quartile. The whiskers extend to observed values within 1.5 IQR of those quartiles. Outlier points are hidden in the QC figure for readability; the observations were not deleted from the calculations.
+
+Heatmap - A table represented with colors. Read the printed percentages and the caption to know whether a darker cell means more data or more missing information.
+
+Hexbin - A two-variable density plot that groups observations into small hexagons. The EDV/ESV figure uses color to show how many videos fall in each hexagon; its color scale is logarithmic.
+
+Video weighting / time weighting - Video weighting gives every video equal weight. Time weighting gives longer videos more weight. One 60-second video contributes one video but 60 seconds. These answer different questions.
+
+Cohort / subgroup / stratum - A cohort is the set included in an analysis. A subgroup is a subset defined by a property. A stratum is a subgroup used when sampling, such as a view label combined with a duration band.
+
+Fixed seed / stratified sampling - A fixed seed makes a random selection repeatable when its inputs are unchanged. Stratified sampling selects within predefined groups. Our QC uses equal allocations to inspect varied cases rather than sampling proportionally to their population frequency.
+
+Convenience subset / selection bias - The current local MIMIC files are the files downloaded so far, rather than a random sample of the whole release. Differences between downloaded and undownloaded studies could affect the distributions.
+
+Correlation / independence - Multiple files from the same examination and frames from one video share information. Counting them as unrelated subjects would exaggerate the effective sample size.
+
+Split / train / validation / test / leakage - A split separates data used for model fitting, model selection and evaluation. Leakage occurs when related information crosses boundaries and makes evaluation too optimistic. We preserve released splits and do not treat video derivatives as independent examples.
+
+Class imbalance - Some categories have more observations than others. Oversampling repeats or preferentially samples selected categories; class balancing changes their influence. Neither was applied before computing these EDA distributions.
+
+Confounding / source shortcut - A factor such as source-specific canvas size may vary together with the view label. A classifier could learn that appearance instead of cardiac anatomy. EchoNet's A4C-only scope and distinctive cropped canvas make this relevant.
+
+Proxy / plausibility / accuracy - A proxy is an indirect measurement. Plausibility asks whether a result looks or behaves reasonably. Accuracy requires comparison against an appropriate reference. A sharp image, a smooth mask or two agreeing classifiers does not establish anatomical accuracy.
+
+PREPROCESSING AND MASKING TERMS
+
+Preprocessing - Operations performed to make inputs usable and consistent. Here these include reading files, checking timing, preserving frame order, identifying a region when reliable, and recording the processing decision.
+
+Ultrasound sector / fan / imaging region - The part of the canvas containing the ultrasound scan. A fan is a common shape of that region. It includes valid dark areas as well as bright tissue; it is not identical to the set of bright or moving pixels.
+
+Mask / binary mask / mask fraction - A mask indicates which pixels are included. A binary mask uses two values, inside and outside. Mask fraction is included pixels divided by all canvas pixels. A 40.3% mask fraction is not a claim that 40.3% of the patient's anatomy is retained.
+
+Dynamic pixel method - The user-facing name for the temporal intensity-variation map shown in sections 4.8 and 4.9. Each pixel's variability across frames is measured; the RGB-channel variability is averaged for display. This is an illustration of motion-related evidence, not a learned model or a direct measurement of physical displacement. The detector has its own sampling and filtering.
+
+Temporal standard deviation - A measure of how much a pixel's intensity changes over time. Heart motion can increase it, but changing screen graphics, noise and compression can also contribute. Low values do not prove that a pixel lies outside the imaging region.
+
+Candidate region / geometry fit / residual - A candidate is a proposed region supported by available evidence. Geometry fitting tries to describe it with a plausible shape. A residual measures mismatch between evidence and a proposed shape; it is not an anatomical error score without a reference mask.
+
+Standard fan / flat-top fan / virtual apex / rotated wedge / rectangle / hull - Shape descriptions. A standard fan widens from an apex; a flat-top or virtual-apex fan has its apex outside the visible region; a rotated wedge is tilted; a rectangle has straight orthogonal edges. A convex hull encloses candidate points like a stretched rubber band. These names describe geometry, not cardiac views or diagnoses.
+
+Allowed area / exclusion mask / clipping - An exclusion mask marks parts of the screen that should not be selected, such as known interface regions. The allowed area is what remains. Clipping a proposed shape to that area prevents it from extending into excluded pixels.
+
+Crop / padding / resize - Cropping removes outer canvas areas. Padding adds a border. Resizing changes the sampling grid. Our accepted example is cropped, masked and padded to a square; that is different from resizing every video to a fixed model-input resolution.
+
+Fixed per cine / dynamic masking - The motion evidence is computed across time, but one accepted mask is held fixed throughout a video. The mask does not follow the heart differently in every frame. It is a sector mask, not a segmentation of the moving ventricle.
+
+SUCCESS / LOW_CONFIDENCE - SUCCESS means the detector accepted its processing decision under its rules. LOW_CONFIDENCE means support was insufficient and the original input is retained for review. These statuses are not independently measured accuracy rates.
+
+PASSTHROUGH / STATIC / MULTI_REGION / FAILED - PASSTHROUGH preserves an already prepared input. STATIC marks insufficient motion evidence for the moving-cine procedure. MULTI_REGION marks a case needing review of more than one candidate region. FAILED indicates an unsuccessful processing attempt. The standardizer preserves these cases rather than applying an uncertain crop.
+
+Retained for review / fallback - Retained means original frames and canvas are kept for further inspection. A fallback is a less specific method or conservative decision used when a preferred method is unreliable.
+
+ECG / tick / depth scale / UI - ECG is an electrocardiogram. A tick is a small marker; a depth scale indicates scanning depth; UI means user interface. A waveform drawn into image pixels differs from a separately stored numerical ECG signal.
+
+Normal fan / dark sector - Normal fan describes a conventional geometric appearance, not a normal clinical diagnosis. Dark sector describes weak image intensity or boundary evidence, not a disease category.
+
+QUALITY AND MODEL TERMS
+
+QC - Quality control. In this EDA it means technical and descriptive checks, such as whether selected frames decode and how their pixels are distributed. It is not an expert clinical quality rating.
+
+Decode - Convert stored compressed image data into an array of pixels that can be displayed or analyzed. Header inspection and pixel decoding are separate checks.
+
+Brightness - For each sampled frame, the average grayscale intensity on a 0-255 analysis scale. A video's brightness summary is the median of these frame averages. It is affected by black background and screen layout.
+
+Nonblack fraction - The fraction of pixels with grayscale intensity greater than 6 in the resized analysis frames. This threshold is a descriptive rule. The quantity is not a measured fraction of visible myocardium.
+
+Laplacian variance - Variability of a local second-derivative image filter. It responds to edges and fine texture and is often used as a sharpness proxy. Noise and text can increase it too. In our QC it is computed per frame, then summarized by the video's median.
+
+B0 / baseline - B0 is the project's existing EV9V-trained reference classifier. Baseline means a reference method for comparison; it does not mean an unprocessed image or an expert label. No B0 training was performed for this EDA.
+
+EchoPrime - An existing externally developed echocardiography model with a view-classification component. We reused cached outputs. The MIMIC distribution uses its original 11 output classes; the EV9V time curves use an existing mapping to five families plus Other.
+
+Probability / argmax / mean probability - A model distributes scores among its classes. Argmax selects the largest score. For the MIMIC chart, we average the raw class probabilities over sampled frames and choose the largest average. This differs from counting each frame's winning label. A score of 0.9 is not automatically a calibrated 90% probability that the label is correct.
+
+Baseline probability - The revised Y-axis wording for both B0 and EchoPrime time plots. It means that panel's model output for each displayed class. It is not the probability that probe movement has occurred.
+
+Entropy / smoothing - Entropy summarizes how spread out a class-probability distribution is: H = -sum(p_k * log(p_k)). More evenly divided scores usually give higher entropy. The uncertain example uses a five-sample moving average of EchoPrime entropy to choose a review window. No diagnostic threshold is claimed.
+
+Stable view / transition / uncertain segment - A stable view retains a broadly consistent imaging plane. A transition changes the view. An uncertain segment lacks a sufficiently clear interpretation. Cyclic heart motion, limited visibility and classifier instability can imitate a transition in prediction curves.
+
+Independent expert review / prevalence / downstream experiment - Independent review provides an external reference. Prevalence is a frequency in a defined population. A downstream experiment evaluates a later task such as view classification. Two selected examples cannot establish transition prevalence or model performance.
+
+DATA DESCRIPTION AND PREPROCESSING: HOW TO READ SECTIONS 0-2
+
+The overview counts 32,506 native file records and 3,471,424 frames. EV9V contributes 5,138 videos; EchoNet contributes 10,030 videos; MIMIC contributes 17,338 DICOM objects, including 9,489 dynamic objects and 7,849 stills. Calling all 32,506 records videos would therefore be inaccurate.
+
+The MIMIC official inventory contains 524,137 expected objects; 3.31% were local in this snapshot. There were 235 started studies and 234 complete studies. Complete means all expected file paths for that study were present. It does not mean every pixel was decoded or every view was correctly labeled.
+
+The main MIMIC motion cohort has 5,685 dynamic objects whose ultrasound-region metadata describe only two-dimensional tissue imaging. B-mode means brightness-mode tissue imaging. Other or mixed region codes and unknown modes remain in the overall inventory. Region metadata can be imperfect; this is a metadata-defined cohort.
+
+The main source tables have different row meanings: the EV9V manifest has 5,138 rows and 14 columns; EchoNet FileList has 10,030 rows and 9 columns; VolumeTracings has 425,010 coordinate-pair rows and 6 columns; the MIMIC official list has 524,137 rows and 4 columns. The unified local inventory has 32,506 rows and 69 columns.
+
+All native file headers were read. Pixel QC used 54 EV9V, 60 MIMIC and 36 EchoNet cines, with up to 16 ordered frames each. All 2,400 requested sample frames decoded. The 128 x 128 resize is an analysis copy for QC measurements; it is not the native dimension reported in the format table.
+
+The original images were not overwritten. Source-specific labels, timing alternatives, stills and uncertain objects remain recorded. A grouping of EV9V filenames is a recording proxy; the local EDA does not independently verify a patient identity for every such group.
+
+MISSINGNESS: HOW TO READ SECTION 3
+
+Missingness asks which information is unavailable and why. Not provided means the source does not supply it; not applicable means it is not meaningful for that object; unavailable locally means it is outside our downloaded material; parse failure means a read failed; conflict means multiple sources disagree. These require different handling.
+
+All 9,489 dynamic MIMIC objects have timing in this snapshot. The 7,849 still images are excluded from the missing-video-timing denominator. An absent NumberOfFrames tag on a single-frame object is interpreted as one image and the inference is recorded; this is not statistical mean imputation.
+
+MIMIC lacks verified view labels in the local annotation sources. A cached model prediction supplies a prediction, not the missing expert annotation. Likewise, none of the sources supplies the expert transition boundaries needed to evaluate the shown discovery intervals.
+
+Six EchoNet videos lack a matched tracing filename and one tracing filename has no matching video. A join links records by a shared key such as the exact filename; unmatched means that link was not found. These cases can remain in video EDA but need a flag for tracing-dependent work.
+
+An imputation replaces a missing value with an estimated value. We do not fill unknown views, physical calibration or patient identities with guesses. We cannot infer that missing information is random merely from its percentage.
+
+4.1 | Cardiac-view distributions
+
+Read the left chart as the number of EV9V videos in each grouped cardiac-view category. Its title is Cardiac views (EV9V), its horizontal axis is Video, and the vertical labels spell out the view names. The four short-axis raw codes are merged into PSAX; PMPALA remains separate.
+
+Read the right chart as the number of MIMIC loops assigned each label by existing EchoPrime predictions. Its title is Predicted cardiac views (MIMIC-IV-Echo). Its denominator is 5,625 cached predictions, not all 17,338 MIMIC objects. A bar counts model-assigned labels, not expert-confirmed occurrences.
+
+The main finding is category imbalance and different label provenance. EV9V PLAX is largest at 1,580, followed by PSAX at 1,332 and A4C at 1,237. EchoNet has been removed from this figure because its A4C-only inclusion rule adds little to a multi-view distribution plot; it remains in the overall EDA.
+
+4.2 | Source-view confounding and weighting
+
+The left chart compares two percentages within EV9V: share of videos and share of recorded time. A view can occupy more time than its video count suggests if its clips are longer. PLAX accounts for about 30.8% of videos but 41.4% of their total duration.
+
+The right heatmap shows how view categories are distributed across sources. Each row uses its own denominator: EV9V labels, MIMIC cached predictions, or EchoNet's dataset scope. N/A means a category is outside the released label set or source scope; it is not a verified absence of that anatomy in every frame.
+
+The practical concern is that source appearance and view labels are associated. A model might recognize a cropped 112 x 112 EchoNet canvas and predict A4C without learning the intended anatomical distinction. This is a potential shortcut, not a measured failure rate in this EDA.
+
+4.3 | Video-length distributions
+
+The revised figure has three histograms in one row: EV9V, MIMIC-IV-Echo and EchoNet-Dynamic. The X-axis is Video length and the Y-axis is Count. Length is in seconds on a logarithmic axis, as stated in the caption. Each bar counts videos falling within the same predefined duration bin.
+
+The bin boundaries and horizontal scale are shared across the panels. Each panel has its own vertical count scale, so compare the printed values rather than bar height alone. These are counts, not percentages or cumulative fractions. Bins are equally spaced in log space and have different widths when measured in seconds.
+
+The MIMIC panel includes 5,685 dynamic tissue-only loops. Median duration is 3.90 seconds for EV9V, 2.61 seconds for this MIMIC cohort and 3.38 seconds for EchoNet. EV9V has the longer tail; a long video offers more opportunity to contain a change, but length alone does not demonstrate one.
+
+4.4 | File type, dimensions and timing
+
+The table lists each source's file representation, count, native width and height, and timing basis. The left plot locates its image dimensions: width on X and height on Y. Marker size increases with count but is not proportional to the number of files.
+
+The right plot is a cumulative FPS distribution. At a chosen FPS, its height tells you what fraction of dynamic records have a rate at or below that value. EV9V uses 30 FPS; EchoNet has a median of 50 FPS; MIMIC timing varies and is derived from available intervals.
+
+These plots show different data formats and temporal sampling. They do not rank clinical image quality. A larger MIMIC canvas does not establish better physical resolution, and video FPS should not be read as heart rate.
+
+4.5 | MIMIC study structure and imaging modes
+
+The left histogram counts complete studies by their number of DICOM objects. X is objects per study; Y is studies. It shows that an examination contributes multiple correlated records, so file counts should not be treated as independent patient counts.
+
+The right chart counts DICOM objects by region-metadata group and static/dynamic status. The groups include tissue-only imaging, other or mixed codes, and unknown mode. There are 5,685 dynamic tissue-only objects, 3,253 other/mixed dynamic objects and 551 unknown-mode dynamic objects.
+
+The main implication is to define an appropriate cohort before comparing motion-related measurements. The local download is incomplete and concentrated in a limited acquisition context; these counts should not be extrapolated to all of MIMIC.
+
+4.6 | EchoNet measurements and annotation coverage
+
+EDV is left-ventricular volume at end-diastole, when filling has ended. ESV is volume at end-systole, after contraction. EF is ejection fraction: 100 * (EDV - ESV) / EDV. Volumes are in millilitres and EF is a percentage. These are released measurements, not measurements newly estimated by this EDA. Definitions and annotation format: https://echonet.github.io/dynamic/
+
+The left histogram counts videos in EF intervals. The median EF is about 59.21%. The right hexbin plot has EDV on X and ESV on Y; color indicates the number of videos in each hexagon on a log color scale. It describes the available measurement distribution without assigning diagnoses.
+
+The EF values agree numerically with the formula applied to EDV and ESV, within about 6.6e-8 percentage points. That checks arithmetic consistency, not independent clinical accuracy. Tracings describe annotated ventricular boundaries in selected frames; they are not ultrasound-sector masks or transition annotations.
+
+4.7 | Sampled image characteristics
+
+The three box plots compare brightness, nonblack pixel fraction and Laplacian variance in the 150-video QC sample. Each observation entering a box plot is a video-level summary. The 2,400 sampled frames are not presented as 2,400 independent videos.
+
+The sample intentionally covers different labels, duration bands and patients. Because small and large strata receive similar allocations, the boxes do not estimate source-wide quality distributions with population weighting. They describe the selected cases.
+
+Lower MIMIC brightness can partly reflect more black background and different acquisition settings. Higher Laplacian variance can reflect sharp tissue, noise or text. Neither result establishes which source has better clinical quality. The logarithmic Y-axis for Laplacian variance helps display values across a wide range.
+
+4.8 | Dynamic masking: accepted normal fan
+
+Read each row left to right: Original, Dynamic pixel method, Fixed proposed mask, Preprocessed output. Rows show different times from the same video. The dynamic-pixel map summarizes variability across time, so it is repeated across the rows. Bright regions mark greater intensity variation, not necessarily the entire valid sector.
+
+The green outline shows the proposed mask boundary. In this example the detector accepts a standard fan and applies one fixed mask to all frames. The result is cropped and padded to 279 x 279 pixels while preserving 279 frames. The repeated number 279 refers separately to a canvas dimension and a frame count.
+
+The mask covers 40.3% of the original canvas. SUCCESS is an internal processing decision, not a ground-truth score. The matching JPEG representation returns LOW_CONFIDENCE, illustrating that two encodings of the same video can behave differently. Normal describes the fan shape, not the patient's health.
+
+4.9 | Dynamic masking: uncertain dark sector
+
+The column names have the same meanings as section 4.8. Here the detector does not have sufficient support for an accepted mask. The displayed green outline is a proposal for inspection. It is not applied to the output.
+
+The status is LOW_CONFIDENCE. Preprocessed output means the result returned by the pipeline; in this case that result is the original 320 x 240 image sequence with all 41 frames retained. It is therefore expected to look unchanged.
+
+The proposed mask occupies about 30.9% of the canvas, but that is not an accepted retained-area measurement. This example demonstrates the conservative fallback: uncertain sector evidence leads to retaining the input for review.
+
+4.10 | Possible view change within one video
+
+The top row shows chronologically ordered frames from one EV9V video. Each label gives a timestamp and a frame index; f45 would mean frame index 45. The images were not created by joining different patients' clips.
+
+Both lower plots use Video time on X and Baseline probability on Y. Time is in seconds and probability ranges from 0 to 1. The panel titles identify B0 and EchoPrime. Colored curves represent cardiac-view classes; consistent colors identify the same class in both panels.
+
+Only classes that reach at least 0.15 somewhere in that video's cached predictions are displayed. The displayed curves therefore need not sum to one at every time. The curves suggest an A4C/A5C change, and the shaded review window is approximately 1.6-2.6 seconds. That window was selected from model evidence, not an independently labeled transition boundary.
+
+The finding is that this is a useful case for review. Agreement between two models does not prove a true anatomical change, and this selected example cannot estimate how often multi-view videos occur.
+
+4.11 | Uncertain interval and possible probe motion
+
+The plot layout and revised axis names match section 4.10. The top frames concentrate on an uncertain interval; they do not necessarily span the full video. The gray window is approximately 1.5-2.7 seconds.
+
+The interval was selected around the highest smoothed EchoPrime entropy. Probability is divided or fluctuates between classes, making it a reasonable place to inspect. The figure plots class probabilities, not the entropy curve used for selection.
+
+Several explanations remain possible: a changing imaging plane, ordinary cardiac motion, temporary poor visibility, or model instability. Probe motion is a possible explanation, not an observed ground-truth label. This is an uncertain-segment example awaiting independent review.
+
+WHAT THE RESULTS SUPPORT
+
+We can describe the frozen local inventory, source-specific distributions, information availability and the behavior of the shown examples. We have checked all inventory headers and decoded all requested frames in a fixed 150-video sample. We have not decoded every frame in every file, established sector-mask accuracy or measured true transition-detection accuracy.
+
+A suitable presentation sentence is: We characterized three heterogeneous echocardiography datasets using source-aware metadata checks, distribution analysis and sampled image inspection. We found substantial differences in canvas size, timing, available view information and video duration. Existing masking can accept a conventional fan while retaining an uncertain dark case; model-based temporal examples identify intervals for review rather than validated view transitions.
+
+REPRODUCIBILITY AND TECHNICAL TERMS
+
+Audit / validation - An audit records what was checked and the outcome. Validation here includes consistency checks, source-table hashes, notebook execution and figure/report inspection. Software checks are not substitutes for clinical validation.
+
+Hash / SHA-256 / stable ID - A hash is a reproducible fingerprint of content or an input key. SHA-256 is the hash algorithm used in the package. A stable hashed file identifier supports matching records across outputs; it does not make that identifier a patient ID. A file checksum helps detect changed bytes.
+
+SOP Instance UID / duplicate - A SOP Instance UID identifies a DICOM object. Repeated identifiers can flag duplicate metadata. No repeated local MIMIC SOP UID was found, but this is not an exhaustive search for visually duplicated image content across different identifiers.
+
+Seed / version / commit / provenance manifest - A seed fixes a random procedure; a version identifies a release; a Git commit identifies saved source-code changes; a provenance manifest records inputs, methods and outputs. These help reproduce the work when the required data and caches are available.
+
+Pixel QC status and inventory status are separate: pixel_decode_checked is false in the original header-only inventory, while the sampled decoding results are stored in qc_sample_results.csv and frame_qc.csv. Reading that flag alone must not be interpreted as evidence that no pixel checks were performed.
+
+The appendix below defines all 69 inventory columns. Blank entries can have source-specific meanings; consult the source, missingness notes and error fields rather than interpreting every blank as the same kind of missing data.

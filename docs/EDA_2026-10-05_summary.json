@@ -99,13 +99,28 @@
   "report_pages_designed": 16,
   "date": "2026-10-05",
   "snapshot_utc": "2026-10-05T19:31:39.983645+00:00",
-  "report_location": "outputs/eda_2026-10-05/EDA_Report_EN.pdf",
+  "report_location": "outputs/eda_2026-10-05_v2/EDA_Report_EN.pdf",
   "publication": "Aggregate metrics only; figures and row-level data stay local.",
   "method_scripts": [
     "scripts/eda_inventory.py",
     "scripts/eda_analyze.py",
-    "scripts/eda_report.py"
+    "scripts/eda_report.py",
+    "scripts/eda_explain.py"
   ],
   "total_files": 32506,
-  "total_frames": 3471424
+  "total_frames": 3471424,
+  "explanation_location": "outputs/eda_2026-10-05_v2/EDA_Explanation_EN.pdf",
+  "presentation_revision": 2,
+  "view_plot_sources": [
+    "EV9V",
+    "MIMIC-IV-Echo"
+  ],
+  "ev9v_psax_raw_codes": [
+    "PASA",
+    "PMVLSA",
+    "PPMLSA",
+    "PMASA"
+  ],
+  "ev9v_psax_videos": 1332,
+  "ev9v_unmapped_videos": 453
 }
