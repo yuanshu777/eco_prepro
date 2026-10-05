@@ -204,7 +204,7 @@ EchoPrime - An existing externally developed echocardiography model with a view-
 
 Probability / argmax / mean probability - A model distributes scores among its classes. Argmax selects the largest score. For the MIMIC chart, we average the raw class probabilities over sampled frames and choose the largest average. This differs from counting each frame's winning label. A score of 0.9 is not automatically a calibrated 90% probability that the label is correct.
 
-Baseline probability - The revised Y-axis wording for both B0 and EchoPrime time plots. It means that panel's model output for each displayed class. It is not the probability that probe movement has occurred.
+Baseline probability / EchoPrime probability - The upper time plot shows the B0 baseline model's class probabilities; the lower time plot shows EchoPrime's class probabilities. Each Y-axis names its model. Neither is the probability that probe movement has occurred.
 
 Entropy / smoothing - Entropy summarizes how spread out a class-probability distribution is: H = -sum(p_k * log(p_k)). More evenly divided scores usually give higher entropy. The uncertain example uses a five-sample moving average of EchoPrime entropy to choose a review window. No diagnostic threshold is claimed.
 
@@ -314,7 +314,7 @@ The proposed mask occupies about 30.9% of the canvas, but that is not an accepte
 
 The top row shows chronologically ordered frames from one EV9V video. Each label gives a timestamp and a frame index; f45 would mean frame index 45. The images were not created by joining different patients' clips.
 
-Both lower plots use Video time on X and Baseline probability on Y. Time is in seconds and probability ranges from 0 to 1. The panel titles identify B0 and EchoPrime. Colored curves represent cardiac-view classes; consistent colors identify the same class in both panels.
+Both curve plots use Video time (s) on X, where s means seconds. The upper curve plot uses Baseline probability on Y; the lower curve plot uses EchoPrime probability. Probability ranges from 0 to 1. The panel titles identify B0 and EchoPrime. Colored curves represent cardiac-view classes; consistent colors identify the same class in both panels.
 
 Only classes that reach at least 0.15 somewhere in that video's cached predictions are displayed. The displayed curves therefore need not sum to one at every time. The curves suggest an A4C/A5C change, and the shaded review window is approximately 1.6-2.6 seconds. That window was selected from model evidence, not an independently labeled transition boundary.
 

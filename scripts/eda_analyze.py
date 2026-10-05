@@ -741,8 +741,8 @@ def temporal_example(df, routing, out, registry, vid, name, title, uncertain=Fal
         ax.set(
             xlim=(0, (n - 1) / fps),
             ylim=(0, 1),
-            ylabel="Baseline probability",
-            xlabel="Video time",
+            ylabel="Baseline probability" if row == 1 else "EchoPrime probability",
+            xlabel="Video time (s)",
         )
         ax.set_title(model, loc="left", fontsize=10)
         ax.legend(loc="upper left", bbox_to_anchor=(1, 1), fontsize=8)
@@ -752,7 +752,7 @@ def temporal_example(df, routing, out, registry, vid, name, title, uncertain=Fal
         fig,
         out,
         name,
-        "Chronological frames from one native EV9V video; video time is in seconds. Baseline probability denotes each displayed model's class probability. Shading marks a review interval, not a verified transition boundary. Prediction changes do not establish probe movement. EV9V: Bo Gou et al., CC BY 4.0.",
+        "Chronological frames from one native EV9V video. The upper plot shows baseline (B0) probabilities and the lower plot shows EchoPrime probabilities; video time is in seconds. Shading marks a review interval, not a verified transition boundary. Prediction changes do not establish probe movement. EV9V: Bo Gou et al., CC BY 4.0.",
         "purposefully selected discovery example; not a prevalence sample",
         registry,
     )
