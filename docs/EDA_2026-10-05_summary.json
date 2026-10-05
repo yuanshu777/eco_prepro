@@ -1,0 +1,111 @@
+{
+  "datasets": [
+    {
+      "dataset": "EV9V",
+      "files": 5138,
+      "frames": 910579,
+      "dynamic": 5138,
+      "header_errors": 0,
+      "total_hours": 8.431287037037036,
+      "duration_median": 3.9,
+      "duration_p05": 1.2666666666666666,
+      "duration_p95": 17.0483333333333,
+      "duration_max": 108.1,
+      "fps_median": 30.0,
+      "timing_conflicts": 0
+    },
+    {
+      "dataset": "MIMIC-IV-Echo",
+      "files": 17338,
+      "frames": 790209,
+      "dynamic": 9489,
+      "header_errors": 0,
+      "total_hours": 7.0448640792975,
+      "duration_median": 2.667344,
+      "duration_p05": 1.5088887,
+      "duration_p95": 3.695263,
+      "duration_max": 28.4520709,
+      "fps_median": 29.81621286390688,
+      "timing_conflicts": 8
+    },
+    {
+      "dataset": "EchoNet-Dynamic",
+      "files": 10030,
+      "frames": 1770636,
+      "dynamic": 10030,
+      "header_errors": 0,
+      "total_hours": 9.63762832589892,
+      "duration_median": 3.38,
+      "duration_p05": 2.18,
+      "duration_p95": 4.88,
+      "duration_max": 20.04,
+      "fps_median": 50.0,
+      "timing_conflicts": 0
+    }
+  ],
+  "bmode_duration": [
+    {
+      "dataset": "EV9V",
+      "n": 5138,
+      "under_2s": 745,
+      "from_2_to_5s": 2454,
+      "from_5_to_10s": 1213,
+      "at_least_10s": 726,
+      "median": 3.9,
+      "p25": 2.5,
+      "p75": 6.925000000000001,
+      "p05": 1.2666666666666666,
+      "p95": 17.0483333333333,
+      "maximum": 108.1
+    },
+    {
+      "dataset": "MIMIC-IV-Echo",
+      "n": 5685,
+      "under_2s": 1002,
+      "from_2_to_5s": 4645,
+      "from_5_to_10s": 24,
+      "at_least_10s": 14,
+      "median": 2.613507,
+      "p25": 2.1886735,
+      "p75": 2.9734099,
+      "p05": 1.435211,
+      "p95": 3.600735920000001,
+      "maximum": 28.4520709
+    },
+    {
+      "dataset": "EchoNet-Dynamic",
+      "n": 10030,
+      "under_2s": 284,
+      "from_2_to_5s": 9331,
+      "from_5_to_10s": 378,
+      "at_least_10s": 37,
+      "median": 3.38,
+      "p25": 2.8486277873070325,
+      "p75": 3.96,
+      "p05": 2.18,
+      "p95": 4.88,
+      "maximum": 20.04
+    }
+  ],
+  "qc_sample": {
+    "MIMIC-IV-Echo": 60,
+    "EV9V": 54,
+    "EchoNet-Dynamic": 36
+  },
+  "expert_temporal_labels": false,
+  "echonet_matched_tracings": 10024,
+  "echonet_unmatched_videos": 6,
+  "mimic_prediction_count": 5625,
+  "report_pages_designed": 16,
+  "date": "2026-10-05",
+  "snapshot_utc": "2026-10-05T19:31:39.983645+00:00",
+  "report_location": "outputs/eda_2026-10-05/EDA_Report_EN.pdf",
+  "publication": "Aggregate metrics only; figures and row-level data stay local.",
+  "method_scripts": [
+    "scripts/eda_inventory.py",
+    "scripts/eda_analyze.py",
+    "scripts/eda_report.py"
+  ],
+  "total_files": 32506,
+  "total_frames": 3471424
+}

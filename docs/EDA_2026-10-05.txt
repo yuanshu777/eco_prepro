@@ -1,0 +1,81 @@
+Echocardiography EDA: EV9V, MIMIC-IV-Echo and EchoNet-Dynamic
+Frozen local inventory: 2026-10-05 19:31:39 UTC
+
+Purpose
+Characterize source differences relevant to ultrasound-region preprocessing and
+temporal cardiac-view analysis. Preserve native timing, distinguish stored loops
+from continuous acquisitions, and separate annotations from model predictions.
+
+Coverage
+EV9V: 5,138 MP4 videos, 910,579 frames, 320 x 240 pixels, nine released clip
+labels. Its matched JPEG sequences are derivatives, not additional videos.
+MIMIC-IV-Echo: 17,338 local DICOM objects, 790,209 frames, 1016 x 708 pixels;
+9,489 moving objects and 7,849 still images. This is 3.31% of the official file
+inventory, spanning 154 patients. The download is still in progress.
+EchoNet-Dynamic: 10,030 AVI videos, 1,770,636 frames, 112 x 112 pixels, A4C by
+dataset design. These released videos are already cropped and masked.
+Total: 32,506 native file records and 3,471,424 frames. Neither count represents
+independent patients. The unified local inventory has 69 columns.
+
+Methods
+All-file header inspection and source-table joins; explicit FPS provenance;
+separate still, dynamic tissue-only, other/mixed-mode and unknown-mode cohorts;
+source-specific distributions without class balancing or global resizing.
+Pixel QC uses a fixed seed and 150 selected cines (54 EV9V, 60 MIMIC, 36 EchoNet),
+with 2,400 ordered frames. Equal allocation across strata is descriptive QC,
+not an unbiased estimate of population quality or error rates.
+The existing detector is illustrated on two native EV9V MP4s. Temporal examples
+reuse earlier prediction caches; no new model training or inference was run.
+
+Main findings
+- Median video duration: EV9V 3.90 s, MIMIC dynamic tissue-only 2.61 s (5,685
+  loops), EchoNet 3.38 s. At least 10 s: 14.1%, 0.25%, and 0.37%, respectively.
+- EV9V has 453 PMPALA clips whose five-family mapping is unresolved. Keep the
+  released nine-class labels and an explicit Unmapped group.
+- MIMIC lacks verified view labels. The 5,625 reused EchoPrime predictions are
+  exploratory model outputs, not reference annotations or clinical prevalence.
+- All dynamic objects have timing in this snapshot. Eight MIMIC objects have
+  conflicting timing tags; FrameTime takes precedence and alternatives remain.
+- EchoNet FileList measurements are complete. Six videos lack a matched tracing
+  filename, and one filename in VolumeTracings has no matching video.
+- Headers are readable for all inventoried files; all 2,400 sampled frames
+  decode. This does not establish full pixel completeness or anatomical quality.
+- A normal EV9V MP4 is masked successfully, while a dark sector is retained
+  with LOW_CONFIDENCE. The matched normal JPEG sequence also returns
+  LOW_CONFIDENCE, demonstrating representation sensitivity.
+- Two native-video intervals illustrate possible view change and uncertainty.
+  Neither has independent expert transition labels. Probe movement is not
+  established by probability fluctuation alone.
+
+Deliverables
+The local 16-page English PDF/HTML includes 12 figure groups: view distributions,
+source-view confounding, durations, dimensions/FPS, missingness, image proxies,
+EchoNet measurements, MIMIC structure, two masking examples and two temporal
+examples. CSV tables, data dictionary, provenance, validation and figure exports
+are packaged with it. New figures, row-level data and the ZIP remain local.
+Report: outputs/eda_2026-10-05/EDA_Report_EN.pdf
+Package: outputs/EDA_EV9V_MIMIC_EchoNet_2026-10-05.zip
+Aggregate machine-readable results: docs/EDA_2026-10-05_summary.json
+
+Reproduction
+Use the repository virtual environment; the eda extra supplies ReportLab and
+the dev extra supplies notebook dependencies. The original data and existing
+prediction caches in the companion echo-view-routing project are required for
+rerunning the full analysis. No raw data or model cache is shipped in the ZIP.
+
+Re-render this report from its packaged frozen tables and figures:
+  .venv/bin/python scripts/eda_report.py --out outputs/eda_2026-10-05
+
+Create a new snapshot and descriptive analysis:
+  .venv/bin/python scripts/eda_inventory.py --out outputs/eda_new
+  .venv/bin/python scripts/eda_analyze.py --out outputs/eda_new
+
+The report's interpretive narrative is reviewed for the current snapshot.
+Its inventory-hash guard rejects a different snapshot; review the narrative
+before updating that guard. Later downloads must not silently alter this EDA.
+Read-only notebook: notebooks/EDA_three_datasets.ipynb
+
+Sources
+EV9V: https://huggingface.co/datasets/bgx666/EV9V
+MIMIC-IV-Echo: https://physionet.org/content/mimic-iv-echo/1.0.1/
+EchoNet-Dynamic: https://echonet.github.io/dynamic/
