@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pydicom
-from matplotlib.ticker import PercentFormatter
+from matplotlib.ticker import MaxNLocator, PercentFormatter
 from PIL import Image
 
 from echoprep.cine import Cine
@@ -316,6 +316,62 @@ def summaries(df, pred, out):
     return overall, resolution, missing, length_table
 
 
+def duration_figure(df, out, registry):
+    """Show comparable linear duration axes, with every longer cine in a tail inset."""
+    ev, mi, en = [df[df.dataset == src] for src in SOURCES]
+    cohorts = [ev, mi[mi.bmode_cine == True], en]
+    cutoff = 20
+    bins = np.arange(0, cutoff + 0.5, 0.5)
+    longest = max(g.duration_s.max() for g in cohorts)
+    tail_max = max(30, 10 * np.ceil(longest / 10))
+    tail_bins = np.arange(cutoff, tail_max + 5, 5)
+    tail_tick_step = max(5, round((tail_max - cutoff) / 2, -1))
+    with plt.rc_context(
+        {
+            "font.family": "DejaVu Sans",
+            "font.size": 10,
+            "axes.spines.top": False,
+            "axes.spines.right": False,
+            "axes.titlesize": 12,
+            "axes.labelsize": 10,
+        }
+    ):
+        fig, axs = plt.subplots(1, 3, figsize=(12.4, 3.7), sharex=True)
+        for ax, src, g, color in zip(axs, SOURCES, cohorts, COLORS):
+            vals = g.duration_s.dropna().to_numpy()
+            main = vals[vals <= cutoff]
+            tail = vals[vals > cutoff]
+            ax.hist(main, bins=bins, color=color, edgecolor="white", linewidth=0.5)
+            ax.set_title(f"{src} (n={len(vals):,})")
+            ax.set_xlim(0, cutoff)
+            ax.set_xticks([0, 5, 10, 15, 20])
+            ax.set_xlabel("Video length (s)")
+            ax.set_ylabel("Count")
+            ax.yaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
+            ax.set_axisbelow(True)
+            ax.grid(axis="y", alpha=0.18)
+
+            inset = ax.inset_axes([0.53, 0.51, 0.43, 0.36])
+            inset.set_facecolor("#f7f9fb")
+            inset.hist(tail, bins=tail_bins, color=color, edgecolor="white", linewidth=0.4)
+            inset.set_xlim(cutoff, tail_max)
+            inset.set_xticks(np.arange(cutoff, tail_max + 1, tail_tick_step))
+            inset.yaxis.set_major_locator(MaxNLocator(nbins=2, integer=True))
+            inset.tick_params(labelsize=7, length=2)
+            inset.set_title(f">20 s: {len(tail):,} videos", fontsize=8, loc="left", pad=5)
+            inset.spines["left"].set_color("#9aa6b2")
+            inset.spines["bottom"].set_color("#9aa6b2")
+        fig.tight_layout()
+        savefig(
+            fig,
+            out,
+            "03_duration",
+            "Main panels show 0-20 seconds in 0.5-second bins on linear axes. Insets show all videos longer than 20 seconds in 5-second bins, also on linear axes; their vertical axes are counts. Count scales vary by panel. EV9V and EchoNet include all videos; MIMIC includes dynamic 2D tissue loops. All timed videos are represented.",
+            "full inventories; MIMIC B-mode header selection",
+            registry,
+        )
+
+
 def distribution_figures(df, pred, qc, out, registry):
     plt.rcParams.update(
         {
@@ -437,34 +493,7 @@ def distribution_figures(df, pred, qc, out, registry):
         registry,
     )
 
-    cohorts = [ev, mi[mi.bmode_cine == True], en]
-    fig, axs = plt.subplots(1, 3, figsize=(12.4, 3.5), sharex=True)
-    bins = np.geomspace(0.1, 150, 38)
-    for ax, src, g, color in zip(axs, SOURCES, cohorts, COLORS):
-        vals = np.sort(g.duration_s.dropna().to_numpy())
-        ax.hist(
-            vals,
-            bins=bins,
-            color=color,
-            edgecolor="white",
-            linewidth=0.5,
-        )
-        ax.set_title(f"{src} (n={len(vals):,})")
-        ax.set_xscale("log")
-        ax.set_xlim(0.1, 150)
-        ax.set_xticks([0.5, 1, 2, 5, 10, 30, 100], ["0.5", "1", "2", "5", "10", "30", "100"])
-        ax.set_xlabel("Video length")
-        ax.set_ylabel("Count")
-        ax.grid(axis="y", alpha=0.2)
-    fig.tight_layout()
-    savefig(
-        fig,
-        out,
-        "03_duration",
-        "Video length is measured in seconds on a logarithmic axis; bars show video counts in identical bins, with a separate count scale for each dataset. EV9V and EchoNet include all videos; MIMIC includes dynamic 2D tissue loops. Playback duration is N/FPS. Stills and unknown-time objects are not assigned zero seconds.",
-        "full inventories; MIMIC B-mode header selection",
-        registry,
-    )
+    duration_figure(df, out, registry)
 
     fig, axs = plt.subplots(1, 2, figsize=(12.4, 3.6))
     for src, g, color in zip(SOURCES, [ev, mi, en], COLORS):
