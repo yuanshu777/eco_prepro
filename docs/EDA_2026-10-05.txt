@@ -53,17 +53,18 @@ source-view confounding, durations, dimensions/FPS, missingness, image proxies,
 EchoNet measurements, MIMIC structure, two masking examples and two temporal
 examples. CSV tables, data dictionary, provenance, validation and figure exports
 are packaged with it. New figures, row-level data and the ZIP remain local.
-Revised report: outputs/eda_2026-10-05_v4/EDA_Report_EN.pdf
-English explanation: outputs/eda_2026-10-05_v4/EDA_Explanation_EN.pdf
-Revised package: outputs/EDA_EV9V_MIMIC_EchoNet_2026-10-05_v4.zip
+Revised report: outputs/eda_2026-10-05_v5/EDA_Report_EN.pdf
+English explanation: outputs/eda_2026-10-05_v5/EDA_Explanation_EN.pdf
+Revised package: outputs/EDA_EV9V_MIMIC_EchoNet_2026-10-05_v5.zip
 Aggregate machine-readable results: docs/EDA_2026-10-05_summary.json
 
 Presentation revision
 Section 4.1 now shows EV9V grouped view families and MIMIC predicted views;
 EchoNet is omitted from this figure. PASA, PMVLSA, PPMLSA and PMASA merge into
 PSAX (1,332 videos); PMPALA remains separate. Section 4.3 uses three adjacent
-histograms with Count and Video length (s) axes. Main panels use linear 0-20 s
-axes with 5 s tick spacing; insets retain every video longer than 20 s.
+histograms with Count and Video length (s) axes. EV9V uses linear 0-80 s axes;
+MIMIC and EchoNet use 0-30 s. All use 1 s bins and no inset plots. The single
+EV9V video beyond 80 s (108.1 s) is annotated; it remains in summary statistics.
 Masking columns use Dynamic pixel
 method and Preprocessed output. The upper temporal plot uses Baseline probability;
 the lower uses EchoPrime probability. Both use Video time (s) on the horizontal
@@ -77,8 +78,8 @@ prediction caches in the companion echo-view-routing project are required for
 rerunning the full analysis. No raw data or model cache is shipped in the ZIP.
 
 Re-render this report from its packaged frozen tables and figures:
-  .venv/bin/python scripts/eda_report.py --out outputs/eda_2026-10-05_v4
-  .venv/bin/python scripts/eda_explain.py --out outputs/eda_2026-10-05_v4
+  .venv/bin/python scripts/eda_report.py --out outputs/eda_2026-10-05_v5
+  .venv/bin/python scripts/eda_explain.py --out outputs/eda_2026-10-05_v5
 
 Create a new snapshot and descriptive analysis:
   .venv/bin/python scripts/eda_inventory.py --out outputs/eda_new

@@ -317,15 +317,12 @@ def summaries(df, pred, out):
 
 
 def duration_figure(df, out, registry):
-    """Show comparable linear duration axes, with every longer cine in a tail inset."""
+    """Use simple source-specific ranges and explicitly annotate off-axis videos."""
     ev, mi, en = [df[df.dataset == src] for src in SOURCES]
     cohorts = [ev, mi[mi.bmode_cine == True], en]
-    cutoff = 20
-    bins = np.arange(0, cutoff + 0.5, 0.5)
-    longest = max(g.duration_s.max() for g in cohorts)
-    tail_max = max(30, 10 * np.ceil(longest / 10))
-    tail_bins = np.arange(cutoff, tail_max + 5, 5)
-    tail_tick_step = max(5, round((tail_max - cutoff) / 2, -1))
+    limits = [80, 30, 30]
+    tick_steps = [20, 5, 5]
+    off_axis_notes = []
     with plt.rc_context(
         {
             "font.family": "DejaVu Sans",
@@ -336,37 +333,49 @@ def duration_figure(df, out, registry):
             "axes.labelsize": 10,
         }
     ):
-        fig, axs = plt.subplots(1, 3, figsize=(12.4, 3.7), sharex=True)
-        for ax, src, g, color in zip(axs, SOURCES, cohorts, COLORS):
+        fig, axs = plt.subplots(1, 3, figsize=(12.4, 3.7))
+        for ax, src, g, color, limit, step in zip(
+            axs, SOURCES, cohorts, COLORS, limits, tick_steps
+        ):
             vals = g.duration_s.dropna().to_numpy()
-            main = vals[vals <= cutoff]
-            tail = vals[vals > cutoff]
-            ax.hist(main, bins=bins, color=color, edgecolor="white", linewidth=0.5)
+            shown = vals[vals <= limit]
+            outside = vals[vals > limit]
+            bins = np.arange(0, limit + 1, 1)
+            ax.hist(shown, bins=bins, color=color, edgecolor="white", linewidth=0.5)
             ax.set_title(f"{src} (n={len(vals):,})")
-            ax.set_xlim(0, cutoff)
-            ax.set_xticks([0, 5, 10, 15, 20])
+            ax.set_xlim(0, limit)
+            ax.set_xticks(np.arange(0, limit + 1, step))
             ax.set_xlabel("Video length (s)")
             ax.set_ylabel("Count")
             ax.yaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
             ax.set_axisbelow(True)
             ax.grid(axis="y", alpha=0.18)
 
-            inset = ax.inset_axes([0.53, 0.51, 0.43, 0.36])
-            inset.set_facecolor("#f7f9fb")
-            inset.hist(tail, bins=tail_bins, color=color, edgecolor="white", linewidth=0.4)
-            inset.set_xlim(cutoff, tail_max)
-            inset.set_xticks(np.arange(cutoff, tail_max + 1, tail_tick_step))
-            inset.yaxis.set_major_locator(MaxNLocator(nbins=2, integer=True))
-            inset.tick_params(labelsize=7, length=2)
-            inset.set_title(f">20 s: {len(tail):,} videos", fontsize=8, loc="left", pad=5)
-            inset.spines["left"].set_color("#9aa6b2")
-            inset.spines["bottom"].set_color("#9aa6b2")
+            if len(outside):
+                noun = "video" if len(outside) == 1 else "videos"
+                ax.text(
+                    0.97,
+                    0.94,
+                    f"{len(outside):,} {noun} > {limit} s\nMaximum: {vals.max():.1f} s",
+                    transform=ax.transAxes,
+                    ha="right",
+                    va="top",
+                    fontsize=9,
+                    color="#46586a",
+                )
+                off_axis_notes.append(
+                    f"{src}: {len(outside):,} {noun} beyond {limit} s "
+                    f"(maximum {vals.max():.1f} s) "
+                    f"{'is' if len(outside) == 1 else 'are'} reported by annotation instead of a bar."
+                )
         fig.tight_layout()
         savefig(
             fig,
             out,
             "03_duration",
-            "Main panels show 0-20 seconds in 0.5-second bins on linear axes. Insets show all videos longer than 20 seconds in 5-second bins, also on linear axes; their vertical axes are counts. Count scales vary by panel. EV9V and EchoNet include all videos; MIMIC includes dynamic 2D tissue loops. All timed videos are represented.",
+            "Linear axes show EV9V from 0-80 s and MIMIC/EchoNet from 0-30 s, with 1-second bins in all panels. "
+            + " ".join(off_axis_notes)
+            + " Cohort counts and summary statistics retain every video. MIMIC includes dynamic 2D tissue loops; count scales vary by panel.",
             "full inventories; MIMIC B-mode header selection",
             registry,
         )

@@ -256,9 +256,9 @@ The practical concern is that source appearance and view labels are associated. 
 
 4.3 | Video-length distributions
 
-The revised figure has three histograms in one row: EV9V, MIMIC-IV-Echo and EchoNet-Dynamic. The X-axis is Video length (s) and the Y-axis is Count. The main panels use linear axes from 0 to 20 seconds, with ticks at 0, 5, 10, 15 and 20. Each main-panel bar counts videos in a 0.5-second interval.
+The revised figure has three histograms in one row: EV9V, MIMIC-IV-Echo and EchoNet-Dynamic. The X-axis is Video length (s) and the Y-axis is Count. EV9V uses a linear axis from 0 to 80 seconds with 20-second tick spacing. MIMIC and EchoNet use 0 to 30 seconds with 5-second tick spacing. All three use 1-second histogram bins, with no inset plots.
 
-Each upper-right inset shows videos longer than 20 seconds on a linear axis, using 5-second bins. The inset title gives their total: 170 EV9V videos, 3 MIMIC loops and 2 EchoNet videos. Main panels and insets together represent every timed video in their cohorts. The main views cover 96.7%, 99.95% and 99.98%, respectively. The panels and insets have separate vertical count scales; compare printed values rather than visual bar heights across them.
+EV9V has one video longer than 80 seconds: its duration is 108.1 seconds. It is identified by a text annotation and has no bar within the plotted range. The other 5,137 EV9V videos are included in the histogram; the next-longest video is 70.1 seconds. All MIMIC and EchoNet videos in the plotted cohorts fit within 30 seconds. Cohort totals, medians and maximum-duration statistics still use every video. Because horizontal ranges and vertical count scales differ, compare axis values rather than visual widths or heights alone.
 
 The MIMIC panel includes 5,685 dynamic tissue-only loops. Median duration is 3.90 seconds for EV9V, 2.61 seconds for this MIMIC cohort and 3.38 seconds for EchoNet. EV9V has the longer tail; a long video offers more opportunity to contain a change, but length alone does not demonstrate one.
 

@@ -99,7 +99,7 @@
   "report_pages_designed": 16,
   "date": "2026-10-05",
   "snapshot_utc": "2026-10-05T19:31:39.983645+00:00",
-  "report_location": "outputs/eda_2026-10-05_v4/EDA_Report_EN.pdf",
+  "report_location": "outputs/eda_2026-10-05_v5/EDA_Report_EN.pdf",
   "publication": "Aggregate metrics only; figures and row-level data stay local.",
   "method_scripts": [
     "scripts/eda_inventory.py",
@@ -109,8 +109,8 @@
   ],
   "total_files": 32506,
   "total_frames": 3471424,
-  "explanation_location": "outputs/eda_2026-10-05_v4/EDA_Explanation_EN.pdf",
-  "presentation_revision": 4,
+  "explanation_location": "outputs/eda_2026-10-05_v5/EDA_Explanation_EN.pdf",
+  "presentation_revision": 5,
   "view_plot_sources": [
     "EV9V",
     "MIMIC-IV-Echo"
@@ -125,24 +125,28 @@
   "ev9v_unmapped_videos": 453,
   "duration_plot": {
     "scale": "linear",
-    "main_range_s": [
-      0,
-      20
-    ],
-    "main_bin_width_s": 0.5,
-    "main_ticks_s": [
-      0,
-      5,
-      10,
-      15,
-      20
-    ],
-    "tail_insets": true,
-    "tail_bin_width_s": 5,
-    "tail_counts": {
-      "EV9V": 170,
-      "MIMIC-IV-Echo": 3,
-      "EchoNet-Dynamic": 2
-    }
+    "ranges_s": {
+      "EV9V": [
+        0,
+        80
+      ],
+      "MIMIC-IV-Echo": [
+        0,
+        30
+      ],
+      "EchoNet-Dynamic": [
+        0,
+        30
+      ]
+    },
+    "bin_width_s": 1,
+    "tail_insets": false,
+    "off_axis_counts": {
+      "EV9V": 1,
+      "MIMIC-IV-Echo": 0,
+      "EchoNet-Dynamic": 0
+    },
+    "ev9v_maximum_s": 108.1,
+    "off_axis_handling": "Explicit text annotation; included in cohort totals and summary statistics."
   }
 }
