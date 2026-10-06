@@ -1,0 +1,95 @@
+EV9V long-video provenance audit
+Audit date: 2026-10-06 UTC
+EDA snapshot examined: 2026-10-05, report version v5
+
+Finding
+The long EV9V videos in the current EDA are already present in the official
+published dataset. Local concatenated demo videos exist, but none are inputs
+to this EDA. This conclusion is based on file contents, not filename patterns.
+
+Verification
+1. Pinned publisher revision: 094135b4da40c9aed9d9550c65305dc8715c7d3a.
+2. Local Videos.tar is 6,606,477,312 bytes. Its full SHA-256 equals the publisher's
+   LFS SHA-256 obtained from the public Hugging Face repository API:
+   1d991e766949e35bc88b9fb07ff2485acffaa98ee7f956c10935c3a1765593ef
+3. The official archive contains 5,138 MP4 files with 5,138 unique video IDs.
+   Those IDs exactly match both ev9v_native.csv and the EV9V EDA inventory.
+4. SHA-256 was computed independently for every local EDA MP4 and its member
+   inside Videos.tar: 5,138/5,138 match, with zero content mismatches.
+5. Git blob hashes of the three original split lists and README.md also equal
+   the publisher's objects at the pinned revision.
+6. scripts/eda_inventory.py reads data/manifests/ev9v_native.csv in the companion
+   echo-view-routing project. It does not read constructed-stream recipe banks
+   or runs/_demo/streams. None of the 33 MP4s in that demo directory is an EDA
+   input. The current EDA therefore needs no merged-video exclusion.
+
+Original published video durations in this EDA
+Longer than 10 s: 721 videos.
+Longer than 20 s: 170 videos.
+Longer than 30 s: 61 videos.
+Longer than 60 s: 5 videos.
+Longer than 80 s: 1 video.
+Maximum: 108.1 s (3,243 frames at 30 fps).
+Second longest: 70.1 s (2,103 frames at 30 fps).
+All thresholds above are strict greater-than comparisons.
+The publisher's dataset card independently gives a maximum of 3,243 frames
+and a rate of 30 fps, which implies 108.1 s of playback.
+Section 4.3 currently displays 0-80 s for EV9V and annotates the one video
+outside that range. The plot limit is not the dataset maximum; the outlier
+remains in the inventory and summary statistics.
+
+Concatenation artifacts located in the companion project
+Directory: /home/william/echo-view-routing/runs/_demo/streams/
+Current provenance index: streams.json and recipes.json.
+There are 33 rendered MP4s, of which 27 are in the current index. Among those
+27, eight use one source fragment and 19 concatenate multiple fragments:
+five same-view joins, three same-view joins with a gamma edit, eight
+cross-view joins, and three streams containing four to six fragments.
+Six additional MP4s lack entries in the current index; their fragment
+provenance is not inferred from their names.
+
+Examples (durations also checked in the MP4 headers):
+  multi_00.mp4: 4 fragments,  9.47 s; A4C -> A4C -> PLAX -> PSAX.
+  multi_01.mp4: 5 fragments, 12.50 s; PSAX -> A5C -> A4C -> SC4C -> PLAX.
+  multi_02.mp4: 6 fragments, 14.33 s; PLAX -> PLAX -> A4C -> A5C -> A4C -> PSAX.
+  diff_PLAX_A4C.mp4: 2 fragments, 6.0 s; PLAX -> A4C.
+The streams index records nominal durations of 9.5, 12.5 and 14.5 s for these
+three multi-fragment examples. Actual rendered durations above are from MP4
+headers, not nominal fragment counts. These two time bases are kept separate.
+Each indexed recipe identifies its source video IDs and fragment offsets.
+scripts/make_demo_streams.py concatenates source frames and renders MP4s.
+echo_routing/compose/stream_assembler.py separately concatenates cached
+features/probabilities according to recipes. A recipe is not an additional
+original recording or necessarily a rendered video.
+There are 18 recipe-bank JSON files in data/manifests/recipes/, including
+multiple versions. One multi-fragment bank version has 1,500 training,
+120 validation and 120 test recipes; these counts are not added to the EDA.
+
+Limits of the conclusion
+Byte identity establishes equivalence to the published EV9V files. It cannot
+establish whether the dataset authors edited recordings before publication,
+or prove that each video represents a continuous acquisition or one view
+throughout. The local artifacts do not establish who created them; attribution
+to the user's friend is unverified. No videos, model outputs or EDA figures
+were changed by this investigation.
+
+Evidence and reproduction
+Aggregate results: docs/EV9V_PROVENANCE_2026-10-06.json
+Local evidence: outputs/ev9v_provenance_2026-10-06_v2/
+  official_repository_files.json: pinned publisher object metadata.
+  original_video_checksums.csv: all 5,138 archive/local content comparisons.
+  original_videos_over_30s.csv: all 61 original files exceeding 30 seconds.
+  demo_video_inventory.csv: 33 local rendered demos and their indexed sources.
+  recipe_bank_inventory.csv: bank counts and hashes, without pooling versions.
+  summary.json: full results including the five longest original videos.
+To reproduce: fetch pinned repository metadata, SHA-256 the complete tar file,
+iterate its MP4 members without extraction, hash each member and the matching
+EDA path, and compare ID sets. Durations come from the frozen EDA table;
+demo durations come from MP4 stream duration multiplied by its time base.
+Only non-image audit documentation and aggregates are committed to Git.
+
+Sources
+Official dataset card:
+https://huggingface.co/datasets/bgx666/EV9V/blob/main/README.md
+Pinned repository metadata:
+https://huggingface.co/api/datasets/bgx666/EV9V/tree/094135b4da40c9aed9d9550c65305dc8715c7d3a?recursive=false

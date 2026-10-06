@@ -1,0 +1,109 @@
+{
+  "audit_timestamp_utc": "2026-10-06T00:34:40.483671+00:00",
+  "official_dataset": "bgx666/EV9V",
+  "official_revision": "094135b4da40c9aed9d9550c65305dc8715c7d3a",
+  "official_metadata_url": "https://huggingface.co/api/datasets/bgx666/EV9V/tree/094135b4da40c9aed9d9550c65305dc8715c7d3a?recursive=false",
+  "eda_inventory": "outputs/eda_2026-10-05_v5/tables/video_inventory.csv",
+  "archive_bytes": 6606477312,
+  "archive_sha256": "1d991e766949e35bc88b9fb07ff2485acffaa98ee7f956c10935c3a1765593ef",
+  "official_archive_sha256": "1d991e766949e35bc88b9fb07ff2485acffaa98ee7f956c10935c3a1765593ef",
+  "archive_matches_official": true,
+  "official_text_file_checks": [
+    {
+      "filename": "train_labeled.txt",
+      "local_git_blob_oid": "ef1c1599086147f70f95f176f507bd1b30c6b1c0",
+      "official_git_blob_oid": "ef1c1599086147f70f95f176f507bd1b30c6b1c0",
+      "matches": true
+    },
+    {
+      "filename": "validation_labeled.txt",
+      "local_git_blob_oid": "13e7e7ae3a6e4a5691d16441d7dc54885685ca58",
+      "official_git_blob_oid": "13e7e7ae3a6e4a5691d16441d7dc54885685ca58",
+      "matches": true
+    },
+    {
+      "filename": "test_labeled.txt",
+      "local_git_blob_oid": "b35773519260625d33a682257273c39cc6e88302",
+      "official_git_blob_oid": "b35773519260625d33a682257273c39cc6e88302",
+      "matches": true
+    },
+    {
+      "filename": "README.md",
+      "local_git_blob_oid": "f44d7f9619fe8285237dac94a6a4946c4631f287",
+      "official_git_blob_oid": "f44d7f9619fe8285237dac94a6a4946c4631f287",
+      "matches": true
+    }
+  ],
+  "eda_ev9v_count": 5138,
+  "native_manifest_count": 5138,
+  "archive_mp4_count": 5138,
+  "archive_unique_mp4_ids": 5138,
+  "eda_ids_equal_native_manifest": true,
+  "eda_ids_equal_archive_ids": true,
+  "byte_comparisons": 5138,
+  "byte_identical_videos": 5138,
+  "duration_threshold_counts": {
+    "greater_than_10_seconds": 721,
+    "greater_than_20_seconds": 170,
+    "greater_than_30_seconds": 61,
+    "greater_than_60_seconds": 5,
+    "greater_than_80_seconds": 1
+  },
+  "rendered_demo_files": 33,
+  "indexed_demo_files": 27,
+  "indexed_multi_fragment_demo_files": 19,
+  "demo_files_in_eda": 0,
+  "demo_kind_counts": {
+    "diff_edit": 4,
+    "diff_none": 4,
+    "unindexed_artifact": 6,
+    "multi": 3,
+    "native": 8,
+    "same_edit": 3,
+    "same_none": 5
+  },
+  "recipe_bank_files": 18,
+  "limitations": [
+    "Byte identity proves equivalence to the published dataset, not unedited or continuous acquisition before publication.",
+    "The audit identifies local concatenation artifacts but does not establish their author.",
+    "Unindexed demo artifacts are reported without inferring their fragment provenance from filenames."
+  ],
+  "eda_inventory_sha256": "147b984c70cbef74c1a5b40f08745a2bb754186678b4f7415530297a5a1a7d60",
+  "native_manifest_sha256": "037b20e0f3451545505c7b80dfc0c1894265e406066c86137df3518174c10433",
+  "demo_recipes_sha256": "03b6f307c763b94069f1be773272065dfb787c1d96d2b505b1e59ee521b81eaf",
+  "mismatched_videos": 0,
+  "longest_original_duration_s": 108.1,
+  "second_longest_original_duration_s": 70.1,
+  "local_evidence_directory": "outputs/ev9v_provenance_2026-10-06_v2",
+  "demo_examples": [
+    {
+      "filename": "multi_00.mp4",
+      "n_fragments": 4,
+      "actual_n_frames": 284,
+      "actual_duration_s": 9.466666666666667,
+      "nominal_index_duration_s": 9.5
+    },
+    {
+      "filename": "multi_01.mp4",
+      "n_fragments": 5,
+      "actual_n_frames": 375,
+      "actual_duration_s": 12.5,
+      "nominal_index_duration_s": 12.5
+    },
+    {
+      "filename": "multi_02.mp4",
+      "n_fragments": 6,
+      "actual_n_frames": 430,
+      "actual_duration_s": 14.333333333333334,
+      "nominal_index_duration_s": 14.5
+    },
+    {
+      "filename": "diff_PLAX_A4C.mp4",
+      "n_fragments": 2,
+      "actual_n_frames": 180,
+      "actual_duration_s": 6.0,
+      "nominal_index_duration_s": 6.0
+    }
+  ],
+  "demo_timing_note": "The current streams index uses nominal fragment timing; some rendered MP4 durations differ. Demo durations in this audit are measured from the files."
+}
