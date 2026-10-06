@@ -1,0 +1,69 @@
+EV9V cardiac-view availability across filename-derived groups
+
+Source inventory: /home/william/echo-preprocess/outputs/eda_2026-10-05_v6/tables/video_inventory.csv
+Filename field: original_id (matches the MP4 path stem)
+Official label field: original_view (cross-checked against native raw_label)
+Native manifest: /home/william/echo-view-routing/data/manifests/ev9v_native.csv
+Total EV9V videos assigned to groups: 5,138
+Videos contributing to the five families: 4,685
+PMPALA videos excluded from cells only: 453
+Total filename-derived groups: 495
+
+Column coverage:
+view  groups_with_view  total_groups  coverage_percent
+PLAX               452           495             91.31
+PSAX               366           495             73.94
+ A4C               415           495             83.84
+ A5C               159           495             32.12
+SC4C               158           495             31.92
+
+Observed view-family count distribution:
+ n_view_families  groups  percent
+               5      60    12.12
+               4     131    26.46
+               3     155    31.31
+               2     113    22.83
+               1      35     7.07
+               0       1     0.20
+
+Groups with all five families: 60
+Groups with only one family: 35
+Groups with zero target families: 1
+
+Reference discrepancies: None
+Data-quality checks: passed; all original records and groups retained.
+PSAX is the union of groups with PASA, PMVLSA, PPMLSA or PMASA.
+n_videos counts all original videos, including PMPALA.
+Rows: descending family count; then PLAX, A4C, PSAX, A5C, SC4C (1 before 0);
+then descending n_videos; then filename_group alphabetically. No clustering.
+
+Filename-derived groups are not verified patients or examinations. A 'not observed' cell means that no released EV9V clip with that view label was found within the filename group; it does not establish that the view was never clinically acquired.
+
+Artifacts
+Directory: outputs/eda_artifacts/ev9v_binary_view_coverage_2026-10-06/
+- ev9v_binary_view_coverage_heatmap.png: 4640 x 4640 pixels, 400 dpi.
+- ev9v_binary_view_coverage_heatmap.pdf: vector cells, embedded TrueType text.
+- ev9v_filename_group_view_coverage.csv: all 495 groups in plotted order;
+  five binary columns, n_view_families, n_videos, and plot_rank.
+- ev9v_view_coverage_summary.csv: numerator, denominator and percent per family.
+- ev9v_view_count_distribution.csv: all six family-count categories, 5 through 0.
+- ev9v_video_group_membership.csv: all original records and group membership.
+New outputs are local. Only code, checks and aggregate text/JSON are published.
+
+Quality assurance
+All original groups remain; the single all-zero group contains one PMPALA clip.
+The filename and label pairs match the official native manifest exactly.
+Both input-file SHA-256 values are unchanged after the analysis.
+Every matrix cell is 0 or 1; PSAX set membership and sorting are independently checked.
+The figure was visually reviewed; all PDF text is inside the page.
+The PDF contains no raster images and its fonts are embedded.
+
+Reproduction (choose a new output directory)
+.venv/bin/python -m scripts.eda_ev9v_binary_coverage \
+  --inventory outputs/eda_2026-10-05_v6/tables/video_inventory.csv \
+  --native-manifest /home/william/echo-view-routing/data/manifests/ev9v_native.csv \
+  --out outputs/eda_artifacts/ev9v_binary_new
+
+The command refuses an existing output directory and does not write source files.
+The reference coverage counts are checked only for discrepancies; they are never
+used to populate or alter the binary coverage matrix.

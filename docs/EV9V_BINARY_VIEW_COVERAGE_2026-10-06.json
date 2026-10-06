@@ -1,0 +1,108 @@
+{
+  "created_utc": "2026-10-06T01:30:21.286369+00:00",
+  "source_sha256": {
+    "/home/william/echo-preprocess/outputs/eda_2026-10-05_v6/tables/video_inventory.csv": "147b984c70cbef74c1a5b40f08745a2bb754186678b4f7415530297a5a1a7d60",
+    "/home/william/echo-view-routing/data/manifests/ev9v_native.csv": "037b20e0f3451545505c7b80dfc0c1894265e406066c86137df3518174c10433"
+  },
+  "filename_field": "original_id",
+  "official_label_field": "original_view",
+  "grouping_rule": "Leading YYYY-MM-DD_HH-MM-SS only",
+  "views": [
+    "PLAX",
+    "PSAX",
+    "A4C",
+    "A5C",
+    "SC4C"
+  ],
+  "pattern_sort_priority": [
+    "PLAX",
+    "A4C",
+    "PSAX",
+    "A5C",
+    "SC4C"
+  ],
+  "total_videos": 5138,
+  "target_family_videos": 4685,
+  "pmpala_videos": 453,
+  "total_groups": 495,
+  "coverage": [
+    {
+      "view": "PLAX",
+      "groups_with_view": 452,
+      "total_groups": 495,
+      "coverage_percent": 91.31313131313131
+    },
+    {
+      "view": "PSAX",
+      "groups_with_view": 366,
+      "total_groups": 495,
+      "coverage_percent": 73.93939393939394
+    },
+    {
+      "view": "A4C",
+      "groups_with_view": 415,
+      "total_groups": 495,
+      "coverage_percent": 83.83838383838383
+    },
+    {
+      "view": "A5C",
+      "groups_with_view": 159,
+      "total_groups": 495,
+      "coverage_percent": 32.121212121212125
+    },
+    {
+      "view": "SC4C",
+      "groups_with_view": 158,
+      "total_groups": 495,
+      "coverage_percent": 31.91919191919192
+    }
+  ],
+  "view_count_distribution": [
+    {
+      "n_view_families": 5,
+      "groups": 60,
+      "percent": 12.121212121212121
+    },
+    {
+      "n_view_families": 4,
+      "groups": 131,
+      "percent": 26.464646464646464
+    },
+    {
+      "n_view_families": 3,
+      "groups": 155,
+      "percent": 31.313131313131315
+    },
+    {
+      "n_view_families": 2,
+      "groups": 113,
+      "percent": 22.828282828282827
+    },
+    {
+      "n_view_families": 1,
+      "groups": 35,
+      "percent": 7.07070707070707
+    },
+    {
+      "n_view_families": 0,
+      "groups": 1,
+      "percent": 0.20202020202020202
+    }
+  ],
+  "checks": {
+    "every_original_video_assigned_once": true,
+    "all_original_groups_retained": true,
+    "psax_union_verified": true,
+    "all_cells_binary": true,
+    "n_videos_includes_pmpala": true,
+    "exact_requested_sort_verified": true,
+    "groups_interpreted_as_patients": false,
+    "source_file_hashes_unchanged": true,
+    "official_native_manifest_labels_match": true
+  },
+  "reference_discrepancies": [],
+  "n_videos_definition": "All original videos in the group, including PMPALA",
+  "png_dpi": 400,
+  "pdf_rendering": "Vector cells and embedded TrueType text",
+  "interpretation_note": "Filename-derived groups are not verified patients or examinations. A 'not observed' cell means that no released EV9V clip with that view label was found within the filename group; it does not establish that the view was never clinically acquired."
+}
