@@ -124,11 +124,18 @@ class Report:
         )
         self.p(self.figures[name]["caption"], small=True)
 
-    def finish(self):
+    def finish(
+        self,
+        basename="EDA_Report_EN",
+        document_title="Echocardiography EDA: Data, Methodology and Results",
+        footer_text="EV9V / MIMIC-IV-Echo / EchoNet-Dynamic | local snapshot 2026-10-05 | research EDA",
+    ):
         self.web.append("</section>")
         style = """body{font-family:Arial,sans-serif;color:#17354c;background:#edf4f6;margin:0}main{max-width:1180px;margin:auto}section{background:white;padding:35px;margin:22px 0}h1{font-size:26px}p{line-height:1.5}table{border-collapse:collapse;width:100%;margin:20px 0}th{background:#edf4f6}th,td{text-align:left;padding:10px;border-bottom:1px solid #ddd;vertical-align:top}img{max-width:100%;height:auto}a{color:#147d80}@media print{section{break-before:page;margin:0}body{background:white}}"""
-        (self.root / "EDA_Report_EN.html").write_text(
-            '<!doctype html><html lang="en"><meta charset="utf-8"><title>Echo EDA: data, methods and findings</title><style>'
+        (self.root / f"{basename}.html").write_text(
+            '<!doctype html><html lang="en"><meta charset="utf-8"><title>'
+            + html.escape(document_title)
+            + "</title><style>"
             + style
             + "</style><main>"
             + "".join(self.web)
@@ -143,18 +150,18 @@ class Report:
             canvas.drawString(
                 36,
                 18,
-                "EV9V / MIMIC-IV-Echo / EchoNet-Dynamic | local snapshot 2026-10-05 | research EDA",
+                footer_text,
             )
             canvas.drawRightString(806, 18, str(doc.page))
 
         doc = SimpleDocTemplate(
-            str(self.root / "EDA_Report_EN.pdf"),
+            str(self.root / f"{basename}.pdf"),
             pagesize=landscape(A4),
             rightMargin=36,
             leftMargin=36,
             topMargin=30,
             bottomMargin=39,
-            title="Echocardiography EDA: Data, Methodology and Results",
+            title=document_title,
             author="eco_prepro",
         )
         doc.build(self.story, onFirstPage=footer, onLaterPages=footer)
@@ -567,6 +574,17 @@ def main():
         small=True,
     )
 
+    coverage_path = root / "ev9v_coverage_summary.json"
+    if coverage_path.exists():
+        coverage = json.loads(coverage_path.read_text())
+        if coverage["inventory_sha256"] != inventory_hash:
+            raise ValueError("EV9V coverage was generated from a different inventory")
+        for section in json.loads((root / "ev9v_coverage_sections.json").read_text()):
+            report.new_page(section["title"])
+            report.figure(section["figure"], maxheight=315)
+            for paragraph in section["paragraphs"]:
+                report.p(paragraph, small=True)
+
     report.new_page("Findings, limitations and reproducibility")
     report.table(
         ["Established by this EDA", "Practical implication"],
@@ -615,6 +633,12 @@ def main():
         "mimic_prediction_count": len(pred),
         "report_pages_designed": report.page,
     }
+    if coverage_path.exists():
+        metrics["ev9v_filename_coverage"] = {
+            "videos": coverage["videos"],
+            "patient_identity_verified": False,
+            "group_counts": {k: v["groups"] for k, v in coverage["analyses"].items()},
+        }
     (root / "report_metrics.json").write_text(json.dumps(metrics, indent=2))
     print("Report rendered:", report.page, "designed pages", flush=True)
 

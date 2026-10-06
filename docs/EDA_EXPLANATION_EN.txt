@@ -328,6 +328,44 @@ The interval was selected around the highest smoothed EchoPrime entropy. Probabi
 
 Several explanations remain possible: a changing imaging plane, ordinary cardiac motion, temporary poor visibility, or model instability. Probe motion is a possible explanation, not an observed ground-truth label. This is an uncertain-segment example awaiting independent review.
 
+4.12 | EV9V filename-group view availability
+
+This analysis uses the same 5,138 original EV9V videos and their released clip labels. Each row of the heatmap is a group formed from the leading date and time in the filename, such as 2022-05-03_09-59-32. This rule produces 495 groups. A filename group is not a verified patient, examination or continuous recording. The release reports 703 patients, but no usable mapping from individual videos to patients is supplied.
+
+Columns are the nine official cardiac-view labels. Cell color represents the number of videos in a group carrying that label: 0, 1, 2, 3-4, 5-9, or 10 or more. The color scale uses count bins; exact counts remain in the CSV. Rows are sorted by the number of distinct labels, the label combination and video count. The vertical axis shows sorted rank, not patient ID or time. The group table maps every rank back to its filename prefix.
+
+A zero means no released video label of that type was observed in the group. It does not mean the view was never acquired clinically. Dataset curation, grouping errors and video-level rather than frame-level labels can all affect availability. The appropriate term is view coverage, not patient missingness.
+
+4.13 | Number of views per filename group
+
+The horizontal axis counts distinct observed labels, from one to nine. The vertical axis counts filename groups. Repeating the same view in several videos increases the number of videos, but does not increase the number of distinct views. A group with all nine labels is not automatically a complete clinical examination.
+
+The left panel uses the date-time prefix and has 495 groups. The right retains all text before _320x240, including optional segment and numeric tokens, and has 685 groups. Both panels use the identical 5,138 videos. The right rule subdivides some left-panel groups; these are two grouping assumptions, not two independently sampled populations.
+
+4.14 | Cardiac view coverage by filename group
+
+For each view, coverage equals the number of groups containing at least one video with that label divided by all 495 date-time groups, multiplied by 100. The annotations show the numerator, denominator and percentage. Each group receives one vote per view, even if it contains many videos with that view.
+
+Percentages across views need not sum to 100 because a group can contain several views. This differs from figure 4.1, where the denominator is videos and each released label contributes to a video class distribution. A2C is outside EV9V's nine-label ontology and is not introduced as an expected but missing category.
+
+4.15 | Common cardiac-view combinations
+
+Each row represents one exact combination of observed labels. Colored markers indicate views present in the combination; gray markers indicate views not observed. The right bar counts groups with exactly that combination, not groups with any subset of it. Percentages use all 495 groups as the denominator.
+
+Only the twelve most frequent combinations are drawn. The caption states how many groups they cover and how many have other combinations. All combinations remain in the CSV. The lines connecting colored markers identify membership in one pattern; they do not indicate temporal transitions between views.
+
+4.16 | Sensitivity to the filename grouping rule
+
+The paired markers compare each view's coverage under the 495-group date-time rule and the 685-group detailed-prefix rule. A connecting line shows the change caused by grouping the same videos differently. A percentage-point difference is the second percentage minus the first; it is not a relative percentage increase.
+
+Neither grouping has been verified against patient identity. Keeping groups within official train, validation and test splits is a consistency check, not proof that they correspond to patients. Different group counts and coverage rates show why the grouping definition must accompany every result. No patient-level confidence interval or significance test is reported.
+
+4.17 | Coverage with PSAX subtypes merged
+
+PASA, PMVLSA, PPMLSA and PMASA are combined into PSAX. PLHLA is renamed PLAX. A4C, A5C and SC4C remain separate, and PMPALA is retained as a separate sixth category. No PMPALA video is dropped or silently assigned to PSAX. The raw nine-label analysis remains primary.
+
+Merged PSAX coverage counts the union of groups that contain at least one of the four short-axis labels. It does not add the four individual percentages, because one group can contain several subtypes. The denominator remains all 495 groups, and all 5,138 videos remain represented. Tables for the 685-group alternative are also supplied for both the original and merged labels.
+
 WHAT THE RESULTS SUPPORT
 
 We can describe the frozen local inventory, source-specific distributions, information availability and the behavior of the shown examples. We have checked all inventory headers and decoded all requested frames in a fixed 150-video sample. We have not decoded every frame in every file, established sector-mask accuracy or measured true transition-detection accuracy.

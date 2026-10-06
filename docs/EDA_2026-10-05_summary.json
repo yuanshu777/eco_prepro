@@ -96,21 +96,22 @@
   "echonet_matched_tracings": 10024,
   "echonet_unmatched_videos": 6,
   "mimic_prediction_count": 5625,
-  "report_pages_designed": 16,
+  "report_pages_designed": 22,
   "date": "2026-10-05",
   "snapshot_utc": "2026-10-05T19:31:39.983645+00:00",
-  "report_location": "outputs/eda_2026-10-05_v5/EDA_Report_EN.pdf",
+  "report_location": "outputs/eda_2026-10-05_v6/EDA_Report_EN.pdf",
   "publication": "Aggregate metrics only; figures and row-level data stay local.",
   "method_scripts": [
     "scripts/eda_inventory.py",
     "scripts/eda_analyze.py",
     "scripts/eda_report.py",
-    "scripts/eda_explain.py"
+    "scripts/eda_explain.py",
+    "scripts/eda_ev9v_coverage.py"
   ],
   "total_files": 32506,
   "total_frames": 3471424,
-  "explanation_location": "outputs/eda_2026-10-05_v5/EDA_Explanation_EN.pdf",
-  "presentation_revision": 5,
+  "explanation_location": "outputs/eda_2026-10-05_v6/EDA_Explanation_EN.pdf",
+  "presentation_revision": 6,
   "view_plot_sources": [
     "EV9V",
     "MIMIC-IV-Echo"
@@ -148,5 +149,16 @@
     },
     "ev9v_maximum_s": 108.1,
     "off_axis_handling": "Explicit text annotation; included in cohort totals and summary statistics."
-  }
+  },
+  "ev9v_filename_coverage": {
+    "videos": 5138,
+    "patient_identity_verified": false,
+    "group_counts": {
+      "timestamp_raw9": 495,
+      "timestamp_merged6": 495,
+      "full_prefix_raw9": 685,
+      "full_prefix_merged6": 685
+    }
+  },
+  "ev9v_coverage_location": "outputs/eda_2026-10-05_v6/EV9V_View_Coverage_EN.pdf"
 }

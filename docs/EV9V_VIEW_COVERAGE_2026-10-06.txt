@@ -1,0 +1,76 @@
+EV9V cardiac-view coverage by filename-derived group
+Frozen data: 2026-10-05 EDA inventory; analysis added 2026-10-06 UTC
+
+Scope and method
+All 5,138 original EV9V videos, using official clip-level labels.
+Primary grouping: leading YYYY-MM-DD_HH-MM-SS, producing 495 groups.
+Sensitivity grouping: literal prefix before _320x240, producing 685 groups.
+The latter retains optional segment/numeric tokens and subdivides 92 primary
+groups. Neither rule is validated as a patient or examination identifier.
+No group crosses the official dataset splits, but this is not identity proof.
+Coverage = groups with at least one clip carrying the label / all groups.
+Repeated matching clips give the same group only one vote for that view.
+
+Findings: primary date-time groups
+Median: 7 videos and 4 distinct released labels per group.
+32 groups have one observed label; 17/495 (3.4%) have all nine labels.
+There are 153 exact label combinations. The most frequent is PLHLA + A4C
+only, with 51/495 groups (10.3%). These are exact combinations, not pairs
+that may also occur within larger combinations.
+
+Raw view       Groups with label / 495      Coverage
+PLHLA                    452                91.3%
+PASA                     194                39.2%
+PMVLSA                   209                42.2%
+PPMLSA                   180                36.4%
+PMASA                    255                51.5%
+A4C                      415                83.8%
+A5C                      159                32.1%
+SC4C                     158                31.9%
+PMPALA                   239                48.3%
+
+Merged PSAX coverage is 366/495 (73.9%). It is the union of groups containing
+PASA, PMVLSA, PPMLSA or PMASA, not a sum of their individual percentages.
+PLHLA is renamed PLAX. PMPALA remains a separate sixth reporting category.
+All videos are retained under both raw-nine and merged-six label schemes.
+
+Grouping sensitivity
+The detailed-prefix rule gives a median of 6 videos and 4 raw labels per
+group. It has 69 single-label groups and 13 groups with all nine labels.
+Raw-view coverage decreases by 3.14 to 5.62 percentage points compared with
+the date-time rule. PASA has the largest decrease, from 39.19% to 33.58%.
+Each rule uses its own full group denominator; no low-coverage group is dropped.
+
+Interpretation
+A missing cell means no released clip label of that type was observed in
+that filename group. It does not prove that the view was never acquired.
+The official release reports 703 patients but supplies no usable video-to-
+patient mapping. Groups must not be presented as patients or complete exams.
+A2C is outside the EV9V label ontology, not a missing expected category.
+Video-level labels do not establish frame-level or transition ground truth.
+No patient-level confidence intervals or clinical completeness claims are made.
+
+Deliverables
+Standalone English report: outputs/eda_2026-10-05_v6/EV9V_View_Coverage_EN.pdf
+Full English EDA: outputs/eda_2026-10-05_v6/EDA_Report_EN.pdf
+English figure explanations: outputs/eda_2026-10-05_v6/EDA_Explanation_EN.pdf
+New EDA sections 4.12-4.17: count heatmap, distinct-view distribution,
+raw-view coverage, exact view combinations, grouping sensitivity and merged
+PSAX coverage. All six figures have PNG and vector PDF exports.
+Per-video membership, per-group count matrices, sorted heatmap-rank lookup,
+coverage, diversity and combination tables remain local in tables/ev9v_*.csv.
+Aggregate results: docs/EV9V_VIEW_COVERAGE_2026-10-06.json.
+
+Reproduction
+Copy the pre-coverage v5 EDA directory to a new output directory. The extension
+checks the frozen inventory hash and refuses to overwrite existing coverage.
+  .venv/bin/python scripts/eda_ev9v_coverage.py --out outputs/eda_new_revision
+  .venv/bin/python scripts/eda_report.py --out outputs/eda_new_revision
+  .venv/bin/python scripts/eda_explain.py --out outputs/eda_new_revision
+The first command creates the tables, figures and standalone report; the
+second integrates sections 4.12-4.17; the third updates the English guide.
+No raw pixels, model inference, rescan or change to preprocessing is required.
+
+Source
+EV9V by Bo Gou et al. (CC BY 4.0):
+https://huggingface.co/datasets/bgx666/EV9V/blob/main/README.md

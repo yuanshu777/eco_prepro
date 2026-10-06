@@ -35,6 +35,12 @@ FIGURES = {
     "4.9": "10_mask_dark",
     "4.10": "11_transition",
     "4.11": "12_uncertain",
+    "4.12": "13_ev9v_group_heatmap",
+    "4.13": "14_ev9v_group_diversity",
+    "4.14": "15_ev9v_group_coverage",
+    "4.15": "16_ev9v_group_combinations",
+    "4.16": "17_ev9v_group_sensitivity",
+    "4.17": "18_ev9v_group_merged",
 }
 
 

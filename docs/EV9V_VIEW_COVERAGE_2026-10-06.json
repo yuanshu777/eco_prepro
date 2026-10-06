@@ -1,0 +1,569 @@
+{
+  "created_utc": "2026-10-06T00:49:30.969786+00:00",
+  "videos": 5138,
+  "inventory_sha256": "147b984c70cbef74c1a5b40f08745a2bb754186678b4f7415530297a5a1a7d60",
+  "grouping_rules": {
+    "timestamp": "Leading YYYY-MM-DD_HH-MM-SS only",
+    "full_prefix": "Literal substring before _320x240, retaining extra tokens"
+  },
+  "patient_identity_verified": false,
+  "view_source": "Official EV9V clip label",
+  "raw_view_order": [
+    "PLHLA",
+    "PASA",
+    "PMVLSA",
+    "PPMLSA",
+    "PMASA",
+    "A4C",
+    "A5C",
+    "SC4C",
+    "PMPALA"
+  ],
+  "merged_view_order": [
+    "PLAX",
+    "PSAX",
+    "A4C",
+    "A5C",
+    "SC4C",
+    "PMPALA"
+  ],
+  "view_names": {
+    "PLHLA": "Parasternal long-axis (PLHLA)",
+    "PASA": "Parasternal short-axis (PASA)",
+    "PMVLSA": "Parasternal short-axis: mitral valve level (PMVLSA)",
+    "PPMLSA": "Parasternal short-axis: papillary muscle level (PPMLSA)",
+    "PMASA": "Parasternal short-axis: apical level (PMASA)",
+    "A4C": "Apical four-chamber (A4C)",
+    "A5C": "Apical five-chamber (A5C)",
+    "SC4C": "Subcostal four-chamber (SC4C)",
+    "PMPALA": "Pulmonary artery long-axis (PMPALA; separate)",
+    "PLAX": "Parasternal long-axis (PLAX)",
+    "PSAX": "Parasternal short-axis (PSAX; four codes merged)"
+  },
+  "merge_mapping": {
+    "PLHLA": "PLAX",
+    "PASA": "PSAX",
+    "PMVLSA": "PSAX",
+    "PPMLSA": "PSAX",
+    "PMASA": "PSAX",
+    "A4C": "A4C",
+    "A5C": "A5C",
+    "SC4C": "SC4C",
+    "PMPALA": "PMPALA"
+  },
+  "analyses": {
+    "timestamp_raw9": {
+      "groups": 495,
+      "videos": 5138,
+      "median_views": 4.0,
+      "median_videos": 7.0,
+      "single_view_groups": 32,
+      "all_categories_groups": 17,
+      "distinct_combinations": 153,
+      "coverage": [
+        {
+          "view": "PLHLA",
+          "groups_with_view": 452,
+          "groups_without_observed_label": 43,
+          "total_groups": 495,
+          "coverage_percent": 91.31313131313131,
+          "videos": 1580
+        },
+        {
+          "view": "PASA",
+          "groups_with_view": 194,
+          "groups_without_observed_label": 301,
+          "total_groups": 495,
+          "coverage_percent": 39.1919191919192,
+          "videos": 269
+        },
+        {
+          "view": "PMVLSA",
+          "groups_with_view": 209,
+          "groups_without_observed_label": 286,
+          "total_groups": 495,
+          "coverage_percent": 42.22222222222222,
+          "videos": 344
+        },
+        {
+          "view": "PPMLSA",
+          "groups_with_view": 180,
+          "groups_without_observed_label": 315,
+          "total_groups": 495,
+          "coverage_percent": 36.36363636363637,
+          "videos": 280
+        },
+        {
+          "view": "PMASA",
+          "groups_with_view": 255,
+          "groups_without_observed_label": 240,
+          "total_groups": 495,
+          "coverage_percent": 51.515151515151516,
+          "videos": 439
+        },
+        {
+          "view": "A4C",
+          "groups_with_view": 415,
+          "groups_without_observed_label": 80,
+          "total_groups": 495,
+          "coverage_percent": 83.83838383838383,
+          "videos": 1237
+        },
+        {
+          "view": "A5C",
+          "groups_with_view": 159,
+          "groups_without_observed_label": 336,
+          "total_groups": 495,
+          "coverage_percent": 32.121212121212125,
+          "videos": 286
+        },
+        {
+          "view": "SC4C",
+          "groups_with_view": 158,
+          "groups_without_observed_label": 337,
+          "total_groups": 495,
+          "coverage_percent": 31.91919191919192,
+          "videos": 250
+        },
+        {
+          "view": "PMPALA",
+          "groups_with_view": 239,
+          "groups_without_observed_label": 256,
+          "total_groups": 495,
+          "coverage_percent": 48.282828282828284,
+          "videos": 453
+        }
+      ],
+      "diversity": [
+        {
+          "n_views": 1,
+          "groups": 32,
+          "percent": 6.4646464646464645
+        },
+        {
+          "n_views": 2,
+          "groups": 83,
+          "percent": 16.767676767676768
+        },
+        {
+          "n_views": 3,
+          "groups": 63,
+          "percent": 12.727272727272727
+        },
+        {
+          "n_views": 4,
+          "groups": 70,
+          "percent": 14.14141414141414
+        },
+        {
+          "n_views": 5,
+          "groups": 66,
+          "percent": 13.333333333333334
+        },
+        {
+          "n_views": 6,
+          "groups": 70,
+          "percent": 14.14141414141414
+        },
+        {
+          "n_views": 7,
+          "groups": 61,
+          "percent": 12.323232323232324
+        },
+        {
+          "n_views": 8,
+          "groups": 33,
+          "percent": 6.666666666666667
+        },
+        {
+          "n_views": 9,
+          "groups": 17,
+          "percent": 3.4343434343434343
+        }
+      ]
+    },
+    "timestamp_merged6": {
+      "groups": 495,
+      "videos": 5138,
+      "median_views": 4.0,
+      "median_videos": 7.0,
+      "single_view_groups": 33,
+      "all_categories_groups": 45,
+      "distinct_combinations": 47,
+      "coverage": [
+        {
+          "view": "PLAX",
+          "groups_with_view": 452,
+          "groups_without_observed_label": 43,
+          "total_groups": 495,
+          "coverage_percent": 91.31313131313131,
+          "videos": 1580
+        },
+        {
+          "view": "PSAX",
+          "groups_with_view": 366,
+          "groups_without_observed_label": 129,
+          "total_groups": 495,
+          "coverage_percent": 73.93939393939394,
+          "videos": 1332
+        },
+        {
+          "view": "A4C",
+          "groups_with_view": 415,
+          "groups_without_observed_label": 80,
+          "total_groups": 495,
+          "coverage_percent": 83.83838383838383,
+          "videos": 1237
+        },
+        {
+          "view": "A5C",
+          "groups_with_view": 159,
+          "groups_without_observed_label": 336,
+          "total_groups": 495,
+          "coverage_percent": 32.121212121212125,
+          "videos": 286
+        },
+        {
+          "view": "SC4C",
+          "groups_with_view": 158,
+          "groups_without_observed_label": 337,
+          "total_groups": 495,
+          "coverage_percent": 31.91919191919192,
+          "videos": 250
+        },
+        {
+          "view": "PMPALA",
+          "groups_with_view": 239,
+          "groups_without_observed_label": 256,
+          "total_groups": 495,
+          "coverage_percent": 48.282828282828284,
+          "videos": 453
+        }
+      ],
+      "diversity": [
+        {
+          "n_views": 1,
+          "groups": 33,
+          "percent": 6.666666666666667
+        },
+        {
+          "n_views": 2,
+          "groups": 91,
+          "percent": 18.383838383838384
+        },
+        {
+          "n_views": 3,
+          "groups": 103,
+          "percent": 20.80808080808081
+        },
+        {
+          "n_views": 4,
+          "groups": 120,
+          "percent": 24.242424242424242
+        },
+        {
+          "n_views": 5,
+          "groups": 103,
+          "percent": 20.80808080808081
+        },
+        {
+          "n_views": 6,
+          "groups": 45,
+          "percent": 9.090909090909092
+        }
+      ]
+    },
+    "full_prefix_raw9": {
+      "groups": 685,
+      "videos": 5138,
+      "median_views": 4.0,
+      "median_videos": 6.0,
+      "single_view_groups": 69,
+      "all_categories_groups": 13,
+      "distinct_combinations": 184,
+      "coverage": [
+        {
+          "view": "PLHLA",
+          "groups_with_view": 604,
+          "groups_without_observed_label": 81,
+          "total_groups": 685,
+          "coverage_percent": 88.17518248175182,
+          "videos": 1580
+        },
+        {
+          "view": "PASA",
+          "groups_with_view": 230,
+          "groups_without_observed_label": 455,
+          "total_groups": 685,
+          "coverage_percent": 33.57664233576642,
+          "videos": 269
+        },
+        {
+          "view": "PMVLSA",
+          "groups_with_view": 267,
+          "groups_without_observed_label": 418,
+          "total_groups": 685,
+          "coverage_percent": 38.97810218978102,
+          "videos": 344
+        },
+        {
+          "view": "PPMLSA",
+          "groups_with_view": 214,
+          "groups_without_observed_label": 471,
+          "total_groups": 685,
+          "coverage_percent": 31.24087591240876,
+          "videos": 280
+        },
+        {
+          "view": "PMASA",
+          "groups_with_view": 315,
+          "groups_without_observed_label": 370,
+          "total_groups": 685,
+          "coverage_percent": 45.98540145985402,
+          "videos": 439
+        },
+        {
+          "view": "A4C",
+          "groups_with_view": 546,
+          "groups_without_observed_label": 139,
+          "total_groups": 685,
+          "coverage_percent": 79.7080291970803,
+          "videos": 1237
+        },
+        {
+          "view": "A5C",
+          "groups_with_view": 187,
+          "groups_without_observed_label": 498,
+          "total_groups": 685,
+          "coverage_percent": 27.299270072992698,
+          "videos": 286
+        },
+        {
+          "view": "SC4C",
+          "groups_with_view": 197,
+          "groups_without_observed_label": 488,
+          "total_groups": 685,
+          "coverage_percent": 28.759124087591243,
+          "videos": 250
+        },
+        {
+          "view": "PMPALA",
+          "groups_with_view": 295,
+          "groups_without_observed_label": 390,
+          "total_groups": 685,
+          "coverage_percent": 43.06569343065693,
+          "videos": 453
+        }
+      ],
+      "diversity": [
+        {
+          "n_views": 1,
+          "groups": 69,
+          "percent": 10.072992700729927
+        },
+        {
+          "n_views": 2,
+          "groups": 114,
+          "percent": 16.642335766423358
+        },
+        {
+          "n_views": 3,
+          "groups": 104,
+          "percent": 15.182481751824817
+        },
+        {
+          "n_views": 4,
+          "groups": 111,
+          "percent": 16.204379562043798
+        },
+        {
+          "n_views": 5,
+          "groups": 93,
+          "percent": 13.576642335766422
+        },
+        {
+          "n_views": 6,
+          "groups": 83,
+          "percent": 12.116788321167883
+        },
+        {
+          "n_views": 7,
+          "groups": 62,
+          "percent": 9.05109489051095
+        },
+        {
+          "n_views": 8,
+          "groups": 36,
+          "percent": 5.255474452554744
+        },
+        {
+          "n_views": 9,
+          "groups": 13,
+          "percent": 1.897810218978102
+        }
+      ]
+    },
+    "full_prefix_merged6": {
+      "groups": 685,
+      "videos": 5138,
+      "median_views": 3.0,
+      "median_videos": 6.0,
+      "single_view_groups": 70,
+      "all_categories_groups": 43,
+      "distinct_combinations": 48,
+      "coverage": [
+        {
+          "view": "PLAX",
+          "groups_with_view": 604,
+          "groups_without_observed_label": 81,
+          "total_groups": 685,
+          "coverage_percent": 88.17518248175182,
+          "videos": 1580
+        },
+        {
+          "view": "PSAX",
+          "groups_with_view": 483,
+          "groups_without_observed_label": 202,
+          "total_groups": 685,
+          "coverage_percent": 70.5109489051095,
+          "videos": 1332
+        },
+        {
+          "view": "A4C",
+          "groups_with_view": 546,
+          "groups_without_observed_label": 139,
+          "total_groups": 685,
+          "coverage_percent": 79.7080291970803,
+          "videos": 1237
+        },
+        {
+          "view": "A5C",
+          "groups_with_view": 187,
+          "groups_without_observed_label": 498,
+          "total_groups": 685,
+          "coverage_percent": 27.299270072992698,
+          "videos": 286
+        },
+        {
+          "view": "SC4C",
+          "groups_with_view": 197,
+          "groups_without_observed_label": 488,
+          "total_groups": 685,
+          "coverage_percent": 28.759124087591243,
+          "videos": 250
+        },
+        {
+          "view": "PMPALA",
+          "groups_with_view": 295,
+          "groups_without_observed_label": 390,
+          "total_groups": 685,
+          "coverage_percent": 43.06569343065693,
+          "videos": 453
+        }
+      ],
+      "diversity": [
+        {
+          "n_views": 1,
+          "groups": 70,
+          "percent": 10.218978102189782
+        },
+        {
+          "n_views": 2,
+          "groups": 127,
+          "percent": 18.54014598540146
+        },
+        {
+          "n_views": 3,
+          "groups": 167,
+          "percent": 24.379562043795623
+        },
+        {
+          "n_views": 4,
+          "groups": 161,
+          "percent": 23.503649635036496
+        },
+        {
+          "n_views": 5,
+          "groups": 117,
+          "percent": 17.080291970802918
+        },
+        {
+          "n_views": 6,
+          "groups": 43,
+          "percent": 6.2773722627737225
+        }
+      ]
+    }
+  },
+  "timestamp_groups_subdivided": 92,
+  "sensitivity": [
+    {
+      "view": "PLHLA",
+      "date_time_percent": 91.31313131313131,
+      "full_prefix_percent": 88.17518248175182,
+      "difference_pp": -3.1379488313794894
+    },
+    {
+      "view": "PASA",
+      "date_time_percent": 39.1919191919192,
+      "full_prefix_percent": 33.57664233576642,
+      "difference_pp": -5.615276856152775
+    },
+    {
+      "view": "PMVLSA",
+      "date_time_percent": 42.22222222222222,
+      "full_prefix_percent": 38.97810218978102,
+      "difference_pp": -3.2441200324412023
+    },
+    {
+      "view": "PPMLSA",
+      "date_time_percent": 36.36363636363637,
+      "full_prefix_percent": 31.24087591240876,
+      "difference_pp": -5.122760451227606
+    },
+    {
+      "view": "PMASA",
+      "date_time_percent": 51.515151515151516,
+      "full_prefix_percent": 45.98540145985402,
+      "difference_pp": -5.529750055297498
+    },
+    {
+      "view": "A4C",
+      "date_time_percent": 83.83838383838383,
+      "full_prefix_percent": 79.7080291970803,
+      "difference_pp": -4.130354641303541
+    },
+    {
+      "view": "A5C",
+      "date_time_percent": 32.121212121212125,
+      "full_prefix_percent": 27.299270072992698,
+      "difference_pp": -4.821942048219427
+    },
+    {
+      "view": "SC4C",
+      "date_time_percent": 31.91919191919192,
+      "full_prefix_percent": 28.759124087591243,
+      "difference_pp": -3.160067831600678
+    },
+    {
+      "view": "PMPALA",
+      "date_time_percent": 48.282828282828284,
+      "full_prefix_percent": 43.06569343065693,
+      "difference_pp": -5.217134852171355
+    }
+  ],
+  "validation": {
+    "video_conservation": true,
+    "group_denominators": true,
+    "psax_union_verified": true,
+    "nested_prefix_rules": true,
+    "no_groups_cross_official_splits": true
+  },
+  "limitations": [
+    "Filename groups are not verified patients or examinations.",
+    "No observed clip label does not establish that a view was never acquired.",
+    "A2C is outside the released label ontology, not a missing expected category.",
+    "Clip labels do not annotate every within-video view or transition."
+  ],
+  "official_source": "https://huggingface.co/datasets/bgx666/EV9V/blob/main/README.md"
+}
